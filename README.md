@@ -4,7 +4,7 @@
 - Entity framework is used to connect to the database, using database first approach
 - DeviceManagementWeb uses DeviceManagementDB to communicate to the database
 - DeviceManagementWeb contains a set of controllers that exposes the database interactions
-- In order to avoid returning the user password from the database in the GetAll / GetById methods, we have a DTO object that maps the information
+- In order to avoid returning the user password from the database in the GetAll / GetById methods, we have a DTO that maps the information
 - Validations in the controllers contains basic validation, since mandatory fields are automatically validated before the code accesses the controller methods. If the fields are not populated, the request will fail.
 - There are validations for the email format and password length
 
