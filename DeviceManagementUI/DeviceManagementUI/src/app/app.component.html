@@ -1,0 +1,16 @@
+<table>
+  <thead>
+    <th>Name</th>
+    <th>Device Type</th>
+    <th>Manufacturer</th>
+    <th>Current user</th>    
+  </thead>
+  <tbody>
+    <tr *ngFor="let device of devices">
+      <td>{{device.name}}</td>
+      <td>{{device.deviceType.name}}</td>
+      <td>{{device.manufacturer.name}}</td>
+      <td><ng-container *ngIf="device.user">{{device.user.firstName}} {{device.user.lastName}}</ng-container></td>
+    </tr>
+  </tbody>
+</table>

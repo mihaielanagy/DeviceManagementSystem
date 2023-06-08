@@ -10,7 +10,7 @@
 
         public Role Role { get; set; }
 
-        public Location Location { get; set; }
+        public LocationDto Location { get; set; }
 
         public string Email { get; set; } = null!;
     }

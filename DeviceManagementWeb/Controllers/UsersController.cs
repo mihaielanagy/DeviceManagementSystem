@@ -24,6 +24,10 @@ namespace DeviceManagementWeb.Controllers
 
             foreach (var user in users)
             {
+                Location loc = _context.Locations.Find(user.IdLocation);
+                City city = _context.Cities.Find(loc.IdCity);
+                Country country = _context.Countries.Find(city.IdCountry);
+
                 var userDto = new UserDto
                 {
                     Id = user.Id,
@@ -31,7 +35,7 @@ namespace DeviceManagementWeb.Controllers
                     LastName = user.LastName,
                     Email = user.Email,
                     Role = _context.Roles.Find(user.IdRole),
-                    Location = _context.Locations.Find(user.IdLocation)
+                    Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = city.Id, Country = country } }
                 };
 
                 usersDto.Add(userDto);
@@ -49,7 +53,10 @@ namespace DeviceManagementWeb.Controllers
             var user = _context.Users.Find(id);
             if (user == null)
                 return BadRequest("User not found");
-                        
+            Location loc = _context.Locations.Find(user.IdLocation);
+            City city = _context.Cities.Find(loc.IdCity);
+            Country country = _context.Countries.Find(city.IdCountry);
+
             var userDto = new UserDto
             {
                 Id = user.Id,
@@ -57,7 +64,7 @@ namespace DeviceManagementWeb.Controllers
                 LastName = user.LastName,
                 Email = user.Email,
                 Role = _context.Roles.Find(user.IdRole),
-                Location = _context.Locations.Find(user.IdLocation)
+                Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = city.Id, Country = country } }
             };
 
             return Ok(userDto);

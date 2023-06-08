@@ -10,7 +10,7 @@
 
         public DeviceType DeviceType { get; set; }
 
-        public OperatingSystemVersion OsVersion { get; set; }
+        public OsVersionDto OsVersion { get; set; }
 
         public Processor Processor { get; set; }
 

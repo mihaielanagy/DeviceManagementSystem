@@ -1,7 +1,7 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 using DeviceManagementWeb.DTOs;
 using Microsoft.AspNetCore.Mvc;
-
+using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 namespace DeviceManagementWeb.Controllers
 {
@@ -117,10 +117,19 @@ namespace DeviceManagementWeb.Controllers
         private DeviceDto MapDevice(Device device)
         {
             User user = null;
+            Location loc = null;
+            City city = null;
+            Country country = null;
             if (device.IdCurrentUser != null)
             {
                 user = _context.Users.Find(device.IdCurrentUser);
+                loc = _context.Locations.Find(user.IdLocation);
+                city = _context.Cities.Find(loc.IdCity);
+                country = _context.Countries.Find(city.IdCountry);
             }
+            OperatingSystemVersion osv = _context.OperatingSystemVersions.Find(device.IdOsversion);
+            OperatingSystem os = _context.OperatingSystems.Find(osv.IdOs);
+
 
             var deviceDto = new DeviceDto
             {
@@ -128,7 +137,7 @@ namespace DeviceManagementWeb.Controllers
                 Name = device.Name,
                 DeviceType = _context.DeviceTypes.Find(device.IdDeviceType),
                 Manufacturer = _context.Manufacturers.Find(device.IdManufacturer),
-                OsVersion = _context.OperatingSystemVersions.Find(device.IdOsversion),
+                OsVersion = new OsVersionDto { Id = osv.Id, Name = osv.Name, OS = os},
                 Processor = _context.Processors.Find(device.IdProcessor),
                 RamAmount = _context.Ramamounts.Find(device.IdRamamount),
                 User = user != null ? new UserDto
@@ -138,7 +147,7 @@ namespace DeviceManagementWeb.Controllers
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Role = _context.Roles.Find(user.IdRole),
-                    Location = _context.Locations.Find(user.IdLocation)
+                    Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = city.Id, Country = country } },
                 } : null
             };
             return deviceDto;
