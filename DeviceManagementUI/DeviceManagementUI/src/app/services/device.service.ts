@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Device } from '../models/device';
+import { Device } from '../devices/device';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -14,6 +14,10 @@ export class DeviceService {
 
   getDevices(): Observable<Device[]>{
     return this.http.get<Device[]>(`${environment.apiUrl}/${this.url}`);
+  }
+
+  deleteDevice(id: number): Observable<Device[]>{
+    return this.http.delete<Device[]>(`${environment.apiUrl}/${this.url}/${id}`);
   }
 
 }

@@ -97,7 +97,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<List<Device>> Delete(int id)
+        public ActionResult<List<DeviceDto>> Delete(int id)
         {
             if (id < 1)
             {
@@ -111,7 +111,7 @@ namespace DeviceManagementWeb.Controllers
             _context.Devices.Remove(device);
             _context.SaveChanges();
 
-            return Ok(_context.Devices.ToList());
+            return Ok(GetAll());
         }
 
         private DeviceDto MapDevice(Device device)

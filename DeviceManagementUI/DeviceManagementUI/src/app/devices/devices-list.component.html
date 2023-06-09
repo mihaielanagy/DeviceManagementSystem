@@ -1,0 +1,39 @@
+<div class = 'card'>
+    <div class="card-header">
+        {{pageTitle}}
+    </div>
+    <div class = 'card-body'>
+        <div class="row">
+            <div class="col-md-2">Filter by:</div>
+            <div class ='col-md-4'>
+                <input type="text" [(ngModel)]="listFilter"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">Filtered by: {{listFilter}}</div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+              <th>Name</th>
+              <th>Device Type</th>
+              <th>Manufacturer</th>
+              <th>Current user</th>
+              <th></th>
+              <th></th>
+            </thead>
+            <tbody>
+              <tr *ngFor="let device of filteredDevices">
+                <td>{{device.name}}</td>
+                <td>{{device.deviceType.name}}</td>
+                <td>{{device.manufacturer.name}}</td>
+                <td><ng-container *ngIf="device.user">{{device.user.firstName}} {{device.user.lastName}}</ng-container></td>
+                <td><ng-container *ngIf="!device.user"><button class = 'btn btn-success'>Book device</button></ng-container></td>
+                <td><button (click)="deleteDevice(device.id)" class = 'btn btn-danger'>Delete device</button></td>                
+              </tr>
+            </tbody>
+          </table>
+    </div>
+    
+</div>

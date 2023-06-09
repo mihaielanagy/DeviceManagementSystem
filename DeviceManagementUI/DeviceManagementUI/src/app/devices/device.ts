@@ -1,7 +1,7 @@
-import { User } from "./user";
+import { User } from "../models/user";
 
 export interface Device{
-    id?: number;
+    id: number;
     name: string;
     manufacturer: Manufacturer;
     deviceType: DeviceType;
