@@ -7,7 +7,7 @@ export interface Device{
     deviceType: DeviceType;
     osVersion: OperatingSystemVersion;
     processor : Processor;
-    ramamount : RamAmount;
+    ramAmount : RamAmount;
     user: User;  
 }
 

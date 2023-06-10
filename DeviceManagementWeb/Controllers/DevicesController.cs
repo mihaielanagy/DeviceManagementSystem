@@ -46,7 +46,7 @@ namespace DeviceManagementWeb.Controllers
 
 
         [HttpPost]
-        public ActionResult<Device> Insert(DeviceInsertDto request)
+        public ActionResult<int> Insert(DeviceInsertDto request)
         {
             if (request == null)
             {

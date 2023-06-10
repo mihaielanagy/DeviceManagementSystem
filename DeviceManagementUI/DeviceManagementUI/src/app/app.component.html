@@ -1,2 +1,10 @@
-<h1>{{pageTitle}}</h1>
-<app-devices></app-devices>
+<nav class = "navbar navbar navbar-expand navbar-light bg-light">
+  <a class = "navbar-brand">{{pageTitle}}</a>
+  <ul class = "nav nav-pills">
+  <li><a class = "nav-link" [routerLink]="['/welcome']">Home</a></li>
+  <li><a class = "nav-link" [routerLink]="['/devices']">Device List</a></li>
+  </ul>  
+</nav>
+<div class="container mt-4">
+  <router-outlet></router-outlet>
+</div>

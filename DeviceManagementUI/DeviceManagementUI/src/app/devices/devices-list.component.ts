@@ -2,10 +2,10 @@ import { Component, OnChanges, OnDestroy, OnInit } from "@angular/core";
 import { Device } from "./device";
 import { DeviceService } from "../services/device.service";
 import { Subscription } from "rxjs";
+import { ActivatedRoute, Router } from "@angular/router";
 
 
 @Component({
-    selector: "app-devices",
     templateUrl: "./devices-list.component.html",
     styleUrls: ["./devices-list.component.css"],
 })
@@ -26,7 +26,7 @@ export class DevicesListComponent implements OnInit, OnDestroy{
         this.filteredDevices = this.performFilter(value)
     }     
 
-    constructor(private deviceService: DeviceService){}
+    constructor(private route: ActivatedRoute, private router: Router, private deviceService: DeviceService){}
 
     performFilter(filterBy: string): Device[]{
         filterBy = filterBy.toLocaleLowerCase();
@@ -42,6 +42,19 @@ export class DevicesListComponent implements OnInit, OnDestroy{
             this.filteredDevices = result;
         })
     }  
+    editDevice(id: number): void{
+        // this.deviceService
+        // .deleteDevice(id)
+        // .subscribe((result: Device[]) => {
+        //     this.devices = result;
+        //     this.filteredDevices = result;
+        // })
+    }
+
+    onUpdateDevice(id: number): void{
+        console.log("the test");
+        this.router.navigate(['devices/edit/',id])
+      }
 
     ngOnInit(): void{    
        this.subGet =  this.deviceService
