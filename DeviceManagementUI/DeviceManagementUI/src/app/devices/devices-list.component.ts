@@ -55,6 +55,9 @@ export class DevicesListComponent implements OnInit, OnDestroy{
         console.log("the test");
         this.router.navigate(['devices/edit/',id])
       }
+    initNewDevice(): void{
+        this.router.navigate(['devices/edit/',0])
+    }
 
     ngOnInit(): void{    
        this.subGet =  this.deviceService

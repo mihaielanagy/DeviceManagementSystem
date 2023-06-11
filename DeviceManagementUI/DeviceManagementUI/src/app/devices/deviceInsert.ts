@@ -1,10 +1,10 @@
-export interface DeviceInsert{
+export class DeviceInsert{
     id?: number;
-    Name: string;
-    idManufacturer: number;
-    idDeviceType: number;
-    idOsVersion: number;
-    idProcessor : number;
-    idRamamount : number;
-    idUser: number;  
+    name: string = "";
+    idManufacturer: number = 0;
+    idDeviceType: number = 0;
+    idOsVersion: number = 0;
+    idProcessor : number = 0;
+    idRamamount : number = 0;
+    idUser: number = 0;  
 }

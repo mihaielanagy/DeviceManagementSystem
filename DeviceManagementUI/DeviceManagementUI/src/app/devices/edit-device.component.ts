@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Device, DeviceType, Manufacturer, OperatingSystemVersion, Processor, RamAmount } from './device';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceService } from '../services/device.service';
+import { DeviceInsert } from './deviceInsert';
 
 @Component({
   selector: 'app-edit-device',
@@ -11,6 +12,7 @@ import { DeviceService } from '../services/device.service';
 export class EditDeviceComponent implements OnInit{
 
   @Input() device?: Device;
+  deviceToAdd : DeviceInsert = new DeviceInsert();
   
   deviceTypes: DeviceType[] =[];
   manufacturers: Manufacturer[] = [];
@@ -23,7 +25,18 @@ export class EditDeviceComponent implements OnInit{
   
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.getDevice(id);
+    console.log(id)
+    if (id!=0){
+      console.log("hello motto")
+      this.getDevice(id);
+    }else{
+      this.device = {} as Device;
+      this.device.deviceType = {} as DeviceType;
+      this.device.manufacturer = {} as Manufacturer;
+      this.device.osVersion = {} as OperatingSystemVersion;
+      this.device.processor = {} as Processor;
+      this.device.ramAmount = {} as RamAmount;
+    }
     this.getDeviceTypes();
     this.getManufacturers();
     this.getOsVersions();
@@ -42,21 +55,23 @@ export class EditDeviceComponent implements OnInit{
     this.deviceService
     .getDeviceTypes()
     .subscribe((result: DeviceType[]) => {
-        this.deviceTypes = result;        
+        this.deviceTypes = result;   
     })}
 
   getManufacturers(): void {
     this.deviceService
     .getManufacturers()
     .subscribe((result: Manufacturer[]) => {
-        this.manufacturers = result;        
+        this.manufacturers = result;  
+        this.manufacturers.sort((a,b) => a.name.localeCompare(b.name))      
     }) }
   
   getOsVersions(): void {
     this.deviceService
     .getOperatingSystemVersions()
     .subscribe((result: OperatingSystemVersion[]) => {
-        this.osVersions = result;        
+        this.osVersions = result;
+        this.osVersions.sort((a,b) => a.name.localeCompare(b.name))       
     })}
 
   getProcessors(): void {
@@ -64,6 +79,7 @@ export class EditDeviceComponent implements OnInit{
     .getProcessors()
     .subscribe((result: Processor[]) => {
         this.processors = result;        
+        this.processors.sort((a,b) => a.name.localeCompare(b.name));       
     })}
     
   getRamAmounts(): void {
@@ -74,13 +90,17 @@ export class EditDeviceComponent implements OnInit{
         this.ramAmounts.sort((a,b) => a.amount - b.amount);        
     })}
 
-    updateDevice(device: Device){
+     updateDevice(device: Device){
 
-    }
-    
-    onBack(): void{
-      this.router.navigate(['/devices'])
-    }
+     }
+
+     createDevice(device: Device){
+
+     }
+
+     onBack(): void{
+       this.router.navigate(['/devices']);
+     }
   
 }
 

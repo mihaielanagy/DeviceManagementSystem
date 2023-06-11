@@ -34,4 +34,6 @@ export class DeviceDetailsComponent implements OnInit{
     console.log("the test");
     this.router.navigate(['devices/edit/',id])
   }
+
+
 }

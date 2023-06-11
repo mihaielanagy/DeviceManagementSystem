@@ -2,7 +2,7 @@
     <div class="card-header">
         {{pageTitle + ': ' + device?.name}}
     </div>
-    <div class="card-body" *ngIf="device">
+    <div class="card-body" *ngIf="device != undefined" >
         <div class = "row">
             <div class="col-md-4">Name:</div>
             <div class="col-md-4"><input class ="form-control" [(ngModel)]="device.name"/></div>
@@ -47,16 +47,25 @@
                   </select>                  
             </div>
         </div>
-
-        
     </div >
     <div class = "card-footer">
-        <!-- <button (click)="updateDevice(device)" *ngIf="device.id">Update</button>
-        <button (click)="updateDevice(device)" *ngIf="!device.id">Create</button> -->
+        
         <button class = "btn btn-outline-secondary"
                 style ="width: 80px"
                 (click)="onBack()">
             <i class = "fa fa-chevron-left"></i> Back
+        </button>
+        <button class = "btn btn-outline-secondary"
+                style ="width: 80px"
+                (click)="device && updateDevice(device)" 
+                *ngIf="device && device.id">
+                Update device
+        </button>
+        <button class = "btn btn-outline-secondary"
+                style ="width: 80px"
+                (click)="device && updateDevice(device)" 
+                *ngIf="!device || !device.id || device.id == 0">Create device 
+                Create device
         </button>
     </div>
 </div>
