@@ -1,24 +1,29 @@
-<div class = "card">
+<form class = "card" #deviceForm="ngForm">
+
     <div class="card-header">
-        {{pageTitle + ': ' + device?.name}}
+        {{pageTitle}}
     </div>
     <div class="card-body" *ngIf="device != undefined" >
         <div class = "row">
             <div class="col-md-4">Name:</div>
-            <div class="col-md-4"><input class ="form-control" [(ngModel)]="device.name"/></div>
+            <div class="col-md-4"><input name="deviceName" required class ="form-control" [(ngModel)]="device.name" #deviceName="ngModel"/></div>
+            <div [hidden]=" deviceName.pristine || deviceName.valid" class="col-md-4">Please add a device name.</div>
         </div>
+        
         <div class = "row">
             <div class="col-md-4">Device Type:</div>
             <div class="col-md-4">
-                <select [(ngModel)]="device.deviceType.id" class="form-control">
+                <select name="deviceType" required [(ngModel)]="device.deviceType.id" #deviceType="ngModel" class="form-control">
                     <option *ngFor="let deviceType of deviceTypes" [value]="deviceType.id">{{ deviceType.name }}</option>
                   </select>                  
-            </div>
+            </div>   
+
         </div>
+
         <div class = "row">
             <div class="col-md-4">Manufacturer:</div>
             <div class="col-md-4">
-                <select [(ngModel)]="device.manufacturer.id" class="form-control">
+                <select name="deviceManufacturer" required [(ngModel)]="device.manufacturer.id" class="form-control">
                     <option *ngFor="let manufacturer of manufacturers" [value]="manufacturer.id">{{ manufacturer.name }}</option>
                   </select>                  
             </div>
@@ -26,7 +31,7 @@
         <div class = "row">
             <div class="col-md-4">Operating System Version:</div>
             <div class="col-md-4">
-                <select [(ngModel)]="device.osVersion.id" class="form-control">
+                <select name="deviceVersion" required [(ngModel)]="device.osVersion.id" class="form-control">
                     <option *ngFor="let osVersion of osVersions" [value]="osVersion.id">{{ osVersion.name }}</option>
                   </select>                  
             </div>
@@ -34,7 +39,7 @@
         <div class = "row">
             <div class="col-md-4">Processor:</div>
             <div class="col-md-4">
-                <select [(ngModel)]="device.processor.id" class="form-control">
+                <select name="deviceProcessor" required [(ngModel)]="device.processor.id" class="form-control">
                     <option *ngFor="let p of processors" [value]="p.id">{{ p.name }}</option>
                   </select>                  
             </div>
@@ -42,32 +47,36 @@
         <div class = "row">
             <div class="col-md-4">RAM Amount:</div>
             <div class="col-md-4">
-                <select [(ngModel)]="device.ramAmount.id" class="form-control">
+                <select name="deviceRamAmount" required [(ngModel)]="device.ramAmount.id" class="form-control">
                     <option *ngFor="let r of ramAmounts" [value]="r.id">{{ r.amount }}</option>
                   </select>                  
             </div>
         </div>
+        <div class = "row" *ngIf="this.errorMessage">
+            <p class ="alert alert-danger col-md-4">{{this.errorMessage}}</p>
+        </div>
     </div >
-    <div class = "card-footer">
-        
+    <div class = "card-footer ">
+               
         <button class = "btn btn-outline-secondary"
-                style ="width: 80px"
+                style ="margin-right: 1%"
                 (click)="onBack()">
             <i class = "fa fa-chevron-left"></i> Back
         </button>
-        <button class = "btn btn-outline-secondary"
-                style ="width: 80px"
+        <button class = "btn btn-success"
                 (click)="device && updateDevice(device)" 
+                [disabled]="!deviceForm.form.valid"
                 *ngIf="device && device.id">
                 Update device
         </button>
-        <button class = "btn btn-outline-secondary"
-                style ="width: 80px"
-                (click)="device && updateDevice(device)" 
-                *ngIf="!device || !device.id || device.id == 0">Create device 
+        <button class = "btn btn-success"
+                [disabled]="!deviceForm.form.valid"
+                (click)="device && createDevice(device)" 
+                *ngIf="!device || !device.id || device.id == 0"> 
                 Create device
         </button>
+      
     </div>
-</div>
+</form>
 
 

@@ -21,16 +21,18 @@ export class DeviceService {
     return this.http.get<Device>(`${environment.apiUrl}/${this.url}/${id}`);
   }
 
-  // addDevice(device: DeviceInsert)Observable<number>{
-  //   return this.http.post<num(`${environment.apiUrl}/${this.url}`);
-  // }
+  addDevice(device: DeviceInsert): Observable<number>{
+    console.log("add device")
+    console.log(`${environment.apiUrl}/${this.url}`)
+    return this.http.post<number>(`${environment.apiUrl}/${this.url}`,device);
+  }
 
   deleteDevice(id: number): Observable<Device[]>{
     return this.http.delete<Device[]>(`${environment.apiUrl}/${this.url}/${id}`);
   } 
 
-  editDevice(id: number): Observable<Device[]>{
-    return this.http.delete<Device[]>(`${environment.apiUrl}/${this.url}/${id}`);
+  editDevice(device: DeviceInsert): Observable<number>{
+    return this.http.put<number>(`${environment.apiUrl}/${this.url}`,device);
   }
 
   getDeviceTypes(): Observable<DeviceType[]>{

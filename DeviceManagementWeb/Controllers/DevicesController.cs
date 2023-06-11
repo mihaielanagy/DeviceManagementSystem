@@ -58,10 +58,9 @@ namespace DeviceManagementWeb.Controllers
                 Name = request.Name,
                 IdDeviceType = request.IdDeviceType,
                 IdManufacturer = request.IdManufacturer,
-                IdCurrentUser = request.IdUser,
                 IdOsversion = request.IdOsVersion,
                 IdProcessor = request.IdProcessor,
-                IdRamamount = request.IdRamAmount
+                IdRamamount = request.IdRamAmount,
             };
 
             _context.Devices.Add(device);
@@ -71,7 +70,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPut]
-        public ActionResult<Device> Update(DeviceInsertDto request)
+        public ActionResult<int> Update(DeviceInsertDto request)
         {
             if (request == null || request.Id < 1)
             {
@@ -93,7 +92,7 @@ namespace DeviceManagementWeb.Controllers
             _context.Devices.Update(device);
             _context.SaveChanges();
 
-            return Ok(_context.Devices.Find(device.Id));
+            return Ok(device.Id);
         }
 
         [HttpDelete("{id}")]
@@ -111,7 +110,7 @@ namespace DeviceManagementWeb.Controllers
             _context.Devices.Remove(device);
             _context.SaveChanges();
 
-            return Ok(GetAll());
+            return Ok(GetAll().Result);
         }
 
         private DeviceDto MapDevice(Device device)

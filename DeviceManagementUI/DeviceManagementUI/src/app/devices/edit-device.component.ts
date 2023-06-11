@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Device, DeviceType, Manufacturer, OperatingSystemVersion, Processor, RamAmount } from './device';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeviceService } from '../services/device.service';
@@ -12,22 +12,22 @@ import { DeviceInsert } from './deviceInsert';
 export class EditDeviceComponent implements OnInit{
 
   @Input() device?: Device;
-  deviceToAdd : DeviceInsert = new DeviceInsert();
-  
+  @Output() deviceUpdatedId = new EventEmitter<number>;
+  deviceToAdd : DeviceInsert = new DeviceInsert();  
   deviceTypes: DeviceType[] =[];
   manufacturers: Manufacturer[] = [];
   osVersions: OperatingSystemVersion[] = [];
   processors: Processor[] = [];
   ramAmounts: RamAmount[] = [];
+  devices : Device[] = [];
 
   pageTitle = "Edit device"
+  errorMessage = "";
   constructor(private route: ActivatedRoute, private router: Router, private deviceService: DeviceService){}
   
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    console.log(id)
     if (id!=0){
-      console.log("hello motto")
       this.getDevice(id);
     }else{
       this.device = {} as Device;
@@ -42,6 +42,7 @@ export class EditDeviceComponent implements OnInit{
     this.getOsVersions();
     this.getProcessors();
     this.getRamAmounts();
+    this.getDevices();
   }
   
   getDevice(id: number): void{
@@ -50,6 +51,12 @@ export class EditDeviceComponent implements OnInit{
     .subscribe((result: Device) => {
         this.device = result;        
     })}
+
+  getDevices(): void{
+    this.deviceService
+        .getDevices()
+        .subscribe((result: Device[]) => 
+            this.devices = result)}
 
   getDeviceTypes(): void {
     this.deviceService
@@ -88,14 +95,51 @@ export class EditDeviceComponent implements OnInit{
     .subscribe((result: RamAmount[]) => {
         this.ramAmounts = result;
         this.ramAmounts.sort((a,b) => a.amount - b.amount);        
-    })}
+    })
+  }
 
      updateDevice(device: Device){
-
+      console.log(device);
+      this.deviceToAdd.id = device.id;
+      this.deviceToAdd.name = device.name;
+      this.deviceToAdd.idDeviceType = device.deviceType.id;
+      this.deviceToAdd.idManufacturer = device.manufacturer.id;
+      this.deviceToAdd.idOsVersion = device.osVersion.id;
+      this.deviceToAdd.idProcessor = device.processor.id;
+      this.deviceToAdd.idRamamount = device.ramAmount.id;      
+      this.deviceToAdd.idUser = device.user?.id;      
+      console.log(this.deviceToAdd);
+      this.deviceService
+      .editDevice(this.deviceToAdd)
+      .subscribe((result: number) => {
+        this.router.navigate(['/devices']);
+        this.deviceUpdatedId.emit(result);
+      })
+      ;
      }
 
      createDevice(device: Device){
-
+      const isInDb = this.devices.find((d) => d.name == device.name);
+      if(isInDb){
+        this.errorMessage = "The device already exists!";
+        return;
+      }
+      console.log(device);
+      this.deviceToAdd.name = device.name;
+      this.deviceToAdd.idDeviceType = device.deviceType.id;
+      this.deviceToAdd.idManufacturer = device.manufacturer.id;
+      this.deviceToAdd.idOsVersion = device.osVersion.id;
+      this.deviceToAdd.idProcessor = device.processor.id;
+      this.deviceToAdd.idRamamount = device.ramAmount.id;
+           
+      console.log(this.deviceToAdd);
+      this.deviceService
+      .addDevice(this.deviceToAdd)
+      .subscribe((result: number) => {
+        this.deviceUpdatedId.emit(result);
+        this.router.navigate(['/devices']);})
+      ;
+      
      }
 
      onBack(): void{

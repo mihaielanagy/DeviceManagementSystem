@@ -6,5 +6,5 @@ export class DeviceInsert{
     idOsVersion: number = 0;
     idProcessor : number = 0;
     idRamamount : number = 0;
-    idUser: number = 0;  
+    idUser?: number = 0;  
 }

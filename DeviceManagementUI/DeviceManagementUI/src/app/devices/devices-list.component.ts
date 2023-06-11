@@ -38,23 +38,18 @@ export class DevicesListComponent implements OnInit, OnDestroy{
         this.deviceService
         .deleteDevice(id)
         .subscribe((result: Device[]) => {
-            this.devices = result;
-            this.filteredDevices = result;
-        })
+            console.log(result)            
+            this.devices = this.devices.filter(item => item.id !== id);
+            this.filteredDevices = this.devices;
+            console.log(this.devices);        
+        })   
+           
     }  
-    editDevice(id: number): void{
-        // this.deviceService
-        // .deleteDevice(id)
-        // .subscribe((result: Device[]) => {
-        //     this.devices = result;
-        //     this.filteredDevices = result;
-        // })
-    }
 
     onUpdateDevice(id: number): void{
-        console.log("the test");
         this.router.navigate(['devices/edit/',id])
       }
+
     initNewDevice(): void{
         this.router.navigate(['devices/edit/',0])
     }
