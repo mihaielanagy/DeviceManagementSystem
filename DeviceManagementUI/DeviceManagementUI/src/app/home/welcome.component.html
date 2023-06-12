@@ -7,14 +7,21 @@
       <div class="text-center">
       </div>
 
-      <div class="text-center">Welcome to:</div>
+      <div class="text-center" >
+        <h4>{{isUserAuthenticated()? "Welcome to" :  "Login to see"}}</h4>
+      </div>
       <div class="text-center">
         <h3>Coolest Device Management System</h3>
       </div>
 
-      <div class="text-center">
-        <a [routerLink]="['/devices']">See devices list</a>
+      <div class="text-center" *ngIf="!isUserAuthenticated()">
+        <button class="btn btn-primary btn-sm btn-login" [routerLink]="['/login']">Login</button>
+        <button class="btn btn-primary btn-sm btn-login" [routerLink]="['/register']">Sign up</button>
       </div>
+      <div class="text-center" *ngIf="isUserAuthenticated()">
+        <button class="btn btn-primary btn-sm" [routerLink]="['/devices']">Go to Device List</button>
+      </div>
+      
     </div>
   </div>
 </div>

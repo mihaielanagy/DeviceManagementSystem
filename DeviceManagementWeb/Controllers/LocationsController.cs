@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DeviceManagementWeb.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace DeviceManagementWeb.Controllers
@@ -17,7 +18,24 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<Location>> GetAll()
         {
-            return Ok(_context.Locations.Include(c=>c.IdCityNavigation).ThenInclude(c=>c.IdCountryNavigation).ToList());
+            var locations = _context.Locations.ToList();
+            var locationsDto = new List<LocationDto>();
+
+            foreach (var location in locations)
+            {
+                City city = _context.Cities.Find(location.IdCity);
+                Country country = _context.Countries.Find(city.IdCountry);
+
+                var locationDto = new LocationDto
+                {
+                    Id = location.Id,
+                    Address = location.Address,
+                    City = new CityDto { Id = city.Id, Name = city.Name, Country = country }
+                };
+                locationsDto.Add(locationDto);
+            }
+
+            return Ok(locationsDto);
         }
 
         [HttpGet("{id}")]

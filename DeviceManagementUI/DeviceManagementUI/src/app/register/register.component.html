@@ -1,0 +1,38 @@
+<form class="form-signin" #registerForm="ngForm" (ngSubmit)="register(registerForm)">
+    <div class="container-fluid">
+        <h2 class="form-signin-heading">Register</h2>
+        <div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+        <br>
+        <label for="firstName" >First Name</label>
+        <input type="text" id="firstName" name="firstName" ngModel class="form-control" placeholder="First Name" 
+            required autofocus/>
+
+        <label for="lastName" >Last Name</label>
+        <input type="text" id="lastName" name="lastName" ngModel class="form-control" placeholder="Last Name" 
+            required autofocus/>
+
+        <label for="emailAddress" >Email address</label>
+        <input type="email" id="emailAddress" name="email" ngModel class="form-control" placeholder="User Name" 
+                required autofocus/>
+
+        <label for="role" >Role</label>
+        <select id="role" name="role" ngModel class="form-control" placeholder="Role" required >
+            <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
+        </select>
+        <label for="location">Location</label>
+        <select id="location" name="location" ngModel class="form-control" placeholder="Location" required >
+            <option *ngFor="let l of locations" [value]="l.id">{{ l.city.name }}, {{l.city.country.name}}: {{l.address}}</option>
+        </select>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" ngModel class="form-control" required />
+        <label for="rePassword">Re-type password</label>
+        <input type="password" id="rePassword" name="rePassword" ngModel class="form-control" required />
+
+        <br>
+
+        <button [disabled]="!registerForm.form.valid" class="btn btn-lg btn-primary btn-block" 
+        type="submit">Submit</button>
+    </div>
+
+</form>
+

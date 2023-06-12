@@ -1,6 +1,9 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 using DeviceManagementWeb.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 namespace DeviceManagementWeb.Controllers
@@ -17,6 +20,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public ActionResult<List<DeviceDto>> GetAll()
         {
             var devices = _context.Devices.ToList();
@@ -33,6 +37,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public ActionResult<DeviceDto> GetById(int id)
         {
             var device = _context.Devices.Find(id);
@@ -46,6 +51,7 @@ namespace DeviceManagementWeb.Controllers
 
 
         [HttpPost]
+        [Authorize]
         public ActionResult<int> Insert(DeviceInsertDto request)
         {
             if (request == null)
@@ -70,6 +76,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         public ActionResult<int> Update(DeviceInsertDto request)
         {
             if (request == null || request.Id < 1)
@@ -96,6 +103,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public ActionResult<List<DeviceDto>> Delete(int id)
         {
             if (id < 1)
@@ -111,6 +119,38 @@ namespace DeviceManagementWeb.Controllers
             _context.SaveChanges();
 
             return Ok(GetAll().Result);
+        }
+
+        [HttpPatch("{id}")]
+        [Authorize]
+        public ActionResult<int> AssignToCurrentUser(int id)
+        {
+            var request = _context.Devices.Find(id);
+
+            var loggedUserEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
+            
+            var loggedUser = _context.Users.FirstOrDefault(u => u.Email == loggedUserEmail);
+
+            if (loggedUser == null)
+            {
+                return BadRequest("Invalid user");
+            }
+
+            if (request == null || request.Id < 1)
+            {
+                return BadRequest("Id is invalid");
+            }
+
+            var device = _context.Devices.Find(request.Id);
+            if (device == null)
+                return BadRequest("Device not found");
+
+            device.IdCurrentUser = loggedUser.Id;
+
+            _context.Devices.Update(device);
+            _context.SaveChanges();
+
+            return Ok(device.Id);
         }
 
         private DeviceDto MapDevice(Device device)
@@ -136,7 +176,7 @@ namespace DeviceManagementWeb.Controllers
                 Name = device.Name,
                 DeviceType = _context.DeviceTypes.Find(device.IdDeviceType),
                 Manufacturer = _context.Manufacturers.Find(device.IdManufacturer),
-                OsVersion = new OsVersionDto { Id = osv.Id, Name = osv.Name, OS = os},
+                OsVersion = new OsVersionDto { Id = osv.Id, Name = osv.Name, OS = os },
                 Processor = _context.Processors.Find(device.IdProcessor),
                 RamAmount = _context.Ramamounts.Find(device.IdRamamount),
                 User = user != null ? new UserDto

@@ -1,5 +1,6 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 using DeviceManagementWeb.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -17,6 +18,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpGet]
+        
         public ActionResult<List<UserDto>> GetAll()
         {
             var users = _context.Users.ToList();
@@ -75,6 +77,10 @@ namespace DeviceManagementWeb.Controllers
         {
             if (!EmailIsValid(userInsertDto.Email))
                 return BadRequest("Invalid email");
+            
+            var existingUser = _context.Users.FirstOrDefault(u => u.Email == userInsertDto.Email);
+            if (existingUser != null)
+                return BadRequest("User already exists");
 
             if (!PasswordIsValid(userInsertDto.Password))
                 return BadRequest("Password too short. Must contain at least 8 characters");
@@ -133,6 +139,7 @@ namespace DeviceManagementWeb.Controllers
 
         private bool EmailIsValid(string email) => email.Contains("@") && email.Contains(".");
         private bool PasswordIsValid(string password) => password.Length >= 8;
+
 
     }
 }

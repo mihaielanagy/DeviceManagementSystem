@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Device, DeviceType, Manufacturer, OperatingSystemVersion, Processor, RamAmount } from '../devices/device';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { DeviceInsert } from '../devices/deviceInsert';
@@ -14,6 +14,10 @@ export class DeviceService {
   private url = "Devices";
 
   getDevices(): Observable<Device[]>{
+    // const token = localStorage.getItem('jwt');
+    // const headers = new HttpHeaders({
+    //   Authorization: `Bearer ${token}`
+    // });
     return this.http.get<Device[]>(`${environment.apiUrl}/${this.url}`);
   }
 
@@ -33,6 +37,10 @@ export class DeviceService {
 
   editDevice(device: DeviceInsert): Observable<number>{
     return this.http.put<number>(`${environment.apiUrl}/${this.url}`,device);
+  }
+
+  assignDevice(id: number): Observable<number>{
+    return this.http.patch<number>(`${environment.apiUrl}/${this.url}/${id}`,id);
   }
 
   getDeviceTypes(): Observable<DeviceType[]>{
