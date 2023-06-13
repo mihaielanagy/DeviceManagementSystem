@@ -32,8 +32,8 @@
             <div class="col-md-4">{{device.ramAmount.amount}}</div>
         </div>
         <div class = "row">
-            <div class="col-md-4">Current user:</div>
-            <div class="col-md-4">{{device.user==null? "Not assigned" : device.user.firstName}}</div>
+            <div class="col-md-4">Device user:</div>
+            <div class="col-md-4" [ngClass]="{'fst-italic': !device.user}">{{device.user==null? "Not assigned" : device.user.firstName + " " + device.user.lastName}} </div>
         </div>
     </div >
     <div class = "card-footer">
