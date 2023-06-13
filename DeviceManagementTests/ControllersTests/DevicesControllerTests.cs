@@ -33,15 +33,18 @@ namespace DeviceManagementTests.ControllersTests
         {
             // Arange
             var controller = new DevicesController(_dbContext);
+            var dbDevice = _dbContext.Devices.FirstOrDefault();
 
             // Act
-            var result = (OkObjectResult)controller.GetById(1).Result;
-            var device = (DeviceDto)result.Value;
+            var result = (OkObjectResult)controller.GetById(dbDevice.Id).Result;
+            var expectedDevice = _dbContext.Devices.Find(dbDevice.Id);
+            var actualDevice = (DeviceDto)result.Value;
 
             // Assert
-            Assert.NotNull(device);
-            Assert.Equal("Samsung Galaxy S22", device.Name);
+            Assert.NotNull(actualDevice);
+            Assert.Equal(expectedDevice.Name, actualDevice.Name);
         }
+
         [Fact]
         public void DevicesController_Insert_InsertsDeviceInDB_DeviceIsInDb()
         {
@@ -82,7 +85,8 @@ namespace DeviceManagementTests.ControllersTests
         {
             // Arange
             var controller = new DevicesController(_dbContext);
-            var dbDevice = _dbContext.Devices.Find(1);
+            var dbDevice = _dbContext.Devices.FirstOrDefault();
+            var idDevice = dbDevice.Id;
             var initialName = (string)dbDevice.Name.Clone();
             dbDevice.Name = "Updated Name";
             var deviceInsertDto = new DeviceInsertDto
@@ -98,7 +102,7 @@ namespace DeviceManagementTests.ControllersTests
 
             // Act
             controller.Update(deviceInsertDto);
-            var deviceGet = _dbContext.Devices.Find(1);
+            var deviceGet = _dbContext.Devices.Find(idDevice);
 
             // Assert
             Assert.Equal(dbDevice.Name, deviceGet.Name);

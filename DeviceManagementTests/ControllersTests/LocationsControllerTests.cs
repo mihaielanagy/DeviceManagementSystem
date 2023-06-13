@@ -1,5 +1,6 @@
 ﻿using DeviceManagementDB.Models;
 using DeviceManagementWeb.Controllers;
+using DeviceManagementWeb.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagementTests.ControllersTests
@@ -20,7 +21,7 @@ namespace DeviceManagementTests.ControllersTests
 
             // Act
             var result = (OkObjectResult)controller.GetAll().Result;
-            var allLocations = (List<Location>)result.Value;
+            var allLocations = (List<LocationDto>)result.Value;
 
             // Assert
             Assert.NotNull(allLocations);
