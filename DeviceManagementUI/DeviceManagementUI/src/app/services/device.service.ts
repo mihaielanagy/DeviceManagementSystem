@@ -39,8 +39,14 @@ export class DeviceService {
     return this.http.put<number>(`${environment.apiUrl}/${this.url}`,device);
   }
 
-  assignDevice(id: number): Observable<number>{
-    return this.http.patch<number>(`${environment.apiUrl}/${this.url}/${id}`,id);
+  assignDevice(deviceId: number): Observable<number>{
+    console.log("in device service assign")
+    return this.http.put<number>(`${environment.apiUrl}/${this.url}/assign/${deviceId}`,deviceId);
+  }
+
+  unAssignDevice(deviceId: number): Observable<number>{
+    console.log("in device service unassign")
+    return this.http.put<number>(`${environment.apiUrl}/${this.url}/unassign/${deviceId}`,deviceId);
   }
 
   getDeviceTypes(): Observable<DeviceType[]>{

@@ -28,7 +28,7 @@ export class LoginComponent {
       const token = (<any>response).token;
       localStorage.setItem("jwt", token);
       this.invalidLogin = false;
-      this.router.navigate(["/"]);
+       window.location.href = '/'
     }, (err: any) => {
       this.invalidLogin = true;
     })

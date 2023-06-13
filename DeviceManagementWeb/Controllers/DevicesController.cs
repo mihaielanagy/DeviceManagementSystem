@@ -121,31 +121,67 @@ namespace DeviceManagementWeb.Controllers
             return Ok(GetAll().Result);
         }
 
-        [HttpPatch("{id}")]
+        [HttpPut("assign/{id}")]
         [Authorize]
-        public ActionResult<int> AssignToCurrentUser(int id)
+        public ActionResult<int> AssignDeviceToCurrentUser(int id)
         {
-            var request = _context.Devices.Find(id);
-
-            var loggedUserEmail = HttpContext.User.FindFirst(ClaimTypes.Email).Value;
-            
-            var loggedUser = _context.Users.FirstOrDefault(u => u.Email == loggedUserEmail);
-
-            if (loggedUser == null)
+            if (id < 1)
             {
-                return BadRequest("Invalid user");
+                return BadRequest("Device id is invalid");
             }
 
-            if (request == null || request.Id < 1)
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
             {
-                return BadRequest("Id is invalid");
+                return BadRequest("User id not found");
             }
 
-            var device = _context.Devices.Find(request.Id);
+            var userId = int.Parse(userIdClaim.Value);
+
+            if (userId < 1)
+            {
+                return BadRequest("User id is invalid");
+            }
+
+            var device = _context.Devices.Find(id);
+            var user = _context.Users.Find(userId);
+
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
             if (device == null)
+            {
                 return BadRequest("Device not found");
+            }
 
-            device.IdCurrentUser = loggedUser.Id;
+           
+            device.IdCurrentUser = user.Id;
+
+            _context.Devices.Update(device);
+            _context.SaveChanges();
+
+            return Ok(device.Id);
+        }
+
+        [HttpPut("unassign/{id}")]
+        [Authorize]
+        public ActionResult<int> UnassignDevice(int id)
+        {
+            if (id < 1)
+            {
+                return BadRequest("Device id is invalid");
+            }
+
+            var device = _context.Devices.Find(id);
+
+            if (device == null)
+            {
+                return BadRequest("Device not found");
+            }
+
+            device.IdCurrentUser = null;
 
             _context.Devices.Update(device);
             _context.SaveChanges();

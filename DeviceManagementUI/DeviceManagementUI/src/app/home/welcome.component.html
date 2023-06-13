@@ -8,10 +8,10 @@
       </div>
 
       <div class="text-center" >
-        <h4>{{isUserAuthenticated()? "Welcome to" :  "Login to see"}}</h4>
+        <h4>{{isUserAuthenticated()? "Hi, " + userName +"! Welcome to" :  "Login to see"}}</h4>
       </div>
       <div class="text-center">
-        <h3>Coolest Device Management System</h3>
+        <h3>The Coolest Device Management System</h3>
       </div>
 
       <div class="text-center" *ngIf="!isUserAuthenticated()">

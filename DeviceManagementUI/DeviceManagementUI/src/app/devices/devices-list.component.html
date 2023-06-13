@@ -10,7 +10,7 @@
                      [(ngModel)]='listFilter' />
             </div>
           <div class ='col-md-2 offset-5'>
-              <button (click)="initNewDevice()" class = 'btn btn-warning'>+ Add device</button>
+              <button (click)="initNewDevice()" class = 'btn btn-primary'>+ Add device</button>
           </div>
         </div>
     </div>
@@ -30,10 +30,13 @@
                 <td><a [routerLink]="['/devices', device.id]">{{device.name}}</a></td>
                 <td>{{device.deviceType.name}}</td>
                 <td>{{device.manufacturer.name}}</td>
-                <td><ng-container *ngIf="device.user">{{device.user.firstName}} {{device.user.lastName}}</ng-container></td>
-                <!-- <td><ng-container *ngIf="!device.user"><button (click)="bookDevice(device.id)" class = 'btn btn-success btn-sm'>Book device</button></ng-container></td> -->
+                <td><ng-container *ngIf="device.user"><span [ngClass]="{'text-danger': device.user && device.user.id === this.userId}">{{device.user.firstName}} {{device.user.lastName}}</span></ng-container></td>
+                <td>
+                  <ng-container *ngIf="!device.user"><button (click)="assignDevice(device.id)" class = 'btn btn-success btn-sm'>Book device</button></ng-container>
+                  <ng-container *ngIf="device. user && device.user.id == this.userId"><button (click)="unassignDevice(device.id)" class = 'btn btn-warning btn-sm'>Unassign device</button></ng-container>
+                </td>
                 <td><button (click)="onUpdateDevice(device.id)" class = 'btn btn-secondary btn-sm'>Update device</button></td>
-                <td><button (click)="deleteDevice(device.id)" class = 'btn btn-outline-danger btn-sm'>Delete device</button></td>                
+                <td><button (click)="deleteDevice(device.id, device.name)" class = 'btn btn-outline-danger btn-sm'>Delete device</button></td>                
               </tr>
             </tbody>
           </table>

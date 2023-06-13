@@ -5,7 +5,10 @@ import { Subscription } from "rxjs";
 import { ActivatedRoute, Router } from "@angular/router";
 import { UserService } from "../services/user.service";
 import { DeviceInsert } from "./deviceInsert";
-// import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { User } from "../users/user";
+
 
 
 @Component({
@@ -16,8 +19,9 @@ export class DevicesListComponent implements OnInit, OnDestroy{
     pageTitle = 'Device List';
     devices: Device[] = [];
     filteredDevices: Device[] = [];
-    userEmail: string = "";
+    userId: number = 0;
     subGet! : Subscription;
+    isCurrentUser = false;
   
     private _listFilter: string ="";
 
@@ -30,7 +34,7 @@ export class DevicesListComponent implements OnInit, OnDestroy{
         this.filteredDevices = this.performFilter(value)
     }     
 
-    constructor(private route: ActivatedRoute, private router: Router, private deviceService: DeviceService, private userService:UserService){}
+    constructor(private route: ActivatedRoute, private router: Router, private deviceService: DeviceService, private userService:UserService, private jwtHelpter : JwtHelperService){}
 
     performFilter(filterBy: string): Device[]{
         filterBy = filterBy.toLocaleLowerCase();
@@ -38,7 +42,9 @@ export class DevicesListComponent implements OnInit, OnDestroy{
         device.name.toLocaleLowerCase().includes(filterBy))
     }
 
-    deleteDevice(id: number): void{
+    deleteDevice(id: number, name: string): void{
+
+        if(confirm(`Are you sure you want to delete the device ${name}?`)){
         this.deviceService
         .deleteDevice(id)
         .subscribe((result: Device[]) => {
@@ -46,17 +52,24 @@ export class DevicesListComponent implements OnInit, OnDestroy{
             this.devices = this.devices.filter(item => item.id !== id);
             this.filteredDevices = this.devices;
             console.log(this.devices);        
-        })   
-           
+            })  
+        }           
     }  
 
     onUpdateDevice(id: number): void{
         this.router.navigate(['devices/edit/',id])
       }
 
-    bookDevice(id: number): void{
-        console.log("book")
-        this.deviceService.assignDevice(id).subscribe(()=> console.log("assign device"));
+    assignDevice(deviceId: number): void{
+        console.log("in component book()")
+        this.deviceService.assignDevice(deviceId).subscribe(()=> console.log("assign device"));
+        window.location.reload();
+    }
+
+    unassignDevice(deviceId: number): void{
+        console.log(this.userId)
+        this.deviceService.unAssignDevice(deviceId).subscribe(()=> console.log("unassign device"));
+        window.location.reload();                
     }
 
     initNewDevice(): void{
@@ -64,17 +77,17 @@ export class DevicesListComponent implements OnInit, OnDestroy{
     }
 
     ngOnInit(): void{  
-        // const token = localStorage.getItem('jwt');
-        // const decodedToken = jwt.decode(token) as {email: string}
-
-        // if(decodedToken && decodedToken.email){
-        //     this.userEmail = decodedToken.email;
-        // } else{
-        //     console.error("Failed to decode the token or retrieve the email address.")
-        // }
+        const token = localStorage.getItem('jwt');
+        if(token && !this.jwtHelpter.isTokenExpired(token)){
+            const decodedToken = this.jwtHelpter.decodeToken(token);
+            const stringId = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']; 
+            this.userId = +stringId;
+            console.log(this.userId);         
+          }
+      
 
         console.log("in init");
-        console.log(this.userEmail);
+        console.log(this.userId);
         this.subGet =  this.deviceService
         .getDevices()
         .subscribe((result: Device[]) => 
