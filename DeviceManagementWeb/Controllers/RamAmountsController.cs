@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DeviceManagementWeb.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagementWeb.Controllers
 {
@@ -6,17 +7,17 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class RamAmountsController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IRamAmountsService _ramAmountsService;
 
-        public RamAmountsController(DeviceManagementContext context)
+        public RamAmountsController(IRamAmountsService ramAmountsService)
         {
-            _context = context;
+            _ramAmountsService = ramAmountsService;
         }
 
         [HttpGet]
         public ActionResult<List<Ramamount>> GetAll()
         {
-            return Ok(_context.Ramamounts.ToList());
+            return Ok(_ramAmountsService.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -25,7 +26,7 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var ramAmount = _context.Ramamounts.FirstOrDefault(i => i.Id == id);
+            var ramAmount = _ramAmountsService.GetById(id);
 
             if (ramAmount == null)
                 return BadRequest("ramAmount not found");

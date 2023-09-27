@@ -1,4 +1,6 @@
 ﻿using DeviceManagementWeb.DTOs;
+using DeviceManagementWeb.Services;
+using DeviceManagementWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -14,21 +16,23 @@ namespace DeviceManagementWeb.Controllers
     public class AuthController : ControllerBase
     {
         private readonly DeviceManagementContext _context;
+        private readonly ILoggingService _loggingService;
 
-        public AuthController(DeviceManagementContext context)
+        public AuthController(DeviceManagementContext context, ILoggingService loggingService)
         {
             _context = context;
+            _loggingService = loggingService;
         }
 
         [HttpPost, Route("login")]
-        public IActionResult Login([FromBody]UserLoginDto user)
+        public IActionResult Login([FromBody] UserLoginDto user)
         {
             if (user == null || string.IsNullOrEmpty(user.Email) ||
                 string.IsNullOrEmpty(user.Password))
                 return BadRequest("Invalid client request");
 
             var foundUser = _context.Users.FirstOrDefault(u => u.Email == user.Email);
-            if (foundUser == null) 
+            if (foundUser == null)
                 return BadRequest("User not found");
             var passwordValid = foundUser.Password.Equals(user.Password);
 
@@ -42,7 +46,7 @@ namespace DeviceManagementWeb.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Name, $"{foundUser.FirstName} {foundUser.LastName}"),                   
+                    new Claim(ClaimTypes.Name, $"{foundUser.FirstName} {foundUser.LastName}"),
                     new Claim(ClaimTypes.NameIdentifier, foundUser.Id.ToString())
                 };
 
@@ -55,6 +59,9 @@ namespace DeviceManagementWeb.Controllers
                 );
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+
+                _loggingService.LogInformation("User logged successfuly.");
+
                 return Ok(new { Token = tokenString });
             }
         }

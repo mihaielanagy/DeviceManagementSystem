@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
+using DeviceManagementWeb.Services.Interfaces;
+using DeviceManagementWeb.Services;
 
 namespace DeviceManagementWeb.Controllers
 {
@@ -7,26 +8,29 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class RolesController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IRolesService _rolesService;
+        private readonly ILoggingService _loggingService;
 
-        public RolesController(DeviceManagementContext context)
+        public RolesController(IRolesService rolesService, ILoggingService loggingService)
         {
-            _context = context;
+            _rolesService = rolesService;
+            _loggingService = loggingService;
         }
 
         [HttpGet]
         public ActionResult<List<Role>> GetAll()
         {
-            return Ok(_context.Roles.ToList());
+            return Ok(_rolesService.GetAll());
         }
 
         [HttpGet("{id}")]
         public ActionResult<Role> GetById(int id)
         {
+                _loggingService.LogInformation("User logged successfuly.");
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var role = _context.Roles.FirstOrDefault(i => i.Id == id);
+            var role = _rolesService.GetById(id);
 
             if (role == null)
                 return BadRequest("Role not found");

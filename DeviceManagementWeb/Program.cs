@@ -1,10 +1,14 @@
 global using DeviceManagementDB.Models;
+using DeviceManagementWeb.Services;
+using DeviceManagementWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.Http;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<ILoggingService, LoggingService>();
+builder.Services.AddTransient<IRolesService, RolesService>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>
