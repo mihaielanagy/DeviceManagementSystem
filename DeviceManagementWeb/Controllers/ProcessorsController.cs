@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DeviceManagementWeb.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagementWeb.Controllers
 {
@@ -6,17 +7,18 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class ProcessorsController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IProcessorsService _processorsService;
 
-        public ProcessorsController(DeviceManagementContext context)
+        public ProcessorsController(IProcessorsService processorsService)
         {
-            _context = context;
+            _processorsService = processorsService;
         }
 
+       
         [HttpGet]
         public ActionResult<List<Processor>> GetAll()
         {
-            return Ok(_context.Processors.ToList());
+            return Ok(_processorsService.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -25,7 +27,7 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var processor = _context.Processors.FirstOrDefault(i => i.Id == id);
+            var processor = _processorsService.GetById(id);
 
             if (processor == null)
                 return BadRequest("Processor not found");

@@ -9,6 +9,11 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<ILoggingService, LoggingService>();
 builder.Services.AddTransient<IRolesService, RolesService>();
+builder.Services.AddTransient<IRamAmountsService, RamAmountsService>();
+builder.Services.AddTransient<IProcessorsService, ProcessorsService>();
+builder.Services.AddTransient<IManufacturersService, ManufacturersService>();
+builder.Services.AddTransient<IDeviceTypesService, DeviceTypesService>();
+builder.Services.AddTransient<ICountriesService, CountriesService>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>

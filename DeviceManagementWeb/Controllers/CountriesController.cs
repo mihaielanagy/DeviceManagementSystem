@@ -1,6 +1,8 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 using DeviceManagementWeb.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using DeviceManagementWeb.Services.Interfaces;
+using System.Data.Entity.Core;
 
 namespace DeviceManagementWeb.Controllers
 {
@@ -8,17 +10,17 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class CountriesController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly ICountriesService _countriesService;
 
-        public CountriesController(DeviceManagementContext context)
+        public CountriesController(ICountriesService countriesService)
         {
-            _context = context;
+            _countriesService = countriesService;
         }
 
         [HttpGet]
         public ActionResult<List<Country>> GetAll()
         {
-            return Ok(_context.Countries.ToList());
+            return Ok(_countriesService.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -27,7 +29,7 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var country = _context.Countries.FirstOrDefault(i => i.Id == id);
+            var country = _countriesService.GetById(id);
 
             if (country == null)
                 return BadRequest("Country not found");
@@ -43,38 +45,45 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Country name cannot be empty");
             }
 
-            var country = new Country
+            
+            try
             {
-                Name = name
-            };
-
-            _context.Countries.Add(country);
-            _context.SaveChanges();
-
-            return Ok(country.Id);
+                var countryId = _countriesService.Insert(name);
+                return Ok(countryId);
+            }
+            catch (Exception)
+            {
+                return BadRequest("Country could not be added.");
+            }          
+            
+            
         }
 
         [HttpPut]
-        public ActionResult Update(string name, int cuntryId)
+        public ActionResult Update(string name, int countryId)
         {
             if (string.IsNullOrEmpty(name))
             {
                 return BadRequest("Country name cannot be empty");
             }
 
-            if (cuntryId < 1)
+            if (countryId < 1)
             {
                 return BadRequest("Country id is invalid");
             }
 
-            var country = _context.Countries.Find(cuntryId);
-            if (country == null)
-                return BadRequest("Country not found");
-
-            country.Name = name;
-            country.Id = cuntryId;
-            _context.Countries.Update(country);
-            _context.SaveChanges();
+            try
+            {
+                _countriesService.Update(name, countryId);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
             return Ok();
         }
@@ -87,12 +96,18 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Id is invalid");
             }
 
-            var country = _context.Countries.Find(id);
-            if (country == null)
-                return BadRequest("Data not found");
-
-            _context.Countries.Remove(country);
-            _context.SaveChanges();
+            try
+            {
+                _countriesService.Delete(id);
+            }
+            catch (ObjectNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            } 
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
 
             return Ok();
         }

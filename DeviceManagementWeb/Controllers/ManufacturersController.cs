@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DeviceManagementWeb.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace DeviceManagementWeb.Controllers
@@ -7,17 +8,17 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class ManufacturersController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly  IManufacturersService _manufacturersService;
 
-        public ManufacturersController(DeviceManagementContext context)
+        public ManufacturersController(IManufacturersService manufacturersService)
         {
-            _context = context;
+            _manufacturersService = manufacturersService;
         }
 
         [HttpGet]
         public ActionResult<List<Manufacturer>> GetAll()
         {
-            return Ok(_context.Manufacturers.ToList());
+            return Ok(_manufacturersService.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -26,7 +27,7 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var manufacturer = _context.Manufacturers.FirstOrDefault(i => i.Id == id);
+            var manufacturer = _manufacturersService.GetById(id);
 
             if (manufacturer == null)
                 return BadRequest("Manufacturer not found");

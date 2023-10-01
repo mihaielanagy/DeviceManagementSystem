@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DeviceManagementWeb.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace DeviceManagementWeb.Controllers
@@ -7,17 +8,17 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class DeviceTypesController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IDeviceTypesService _deviceTypesService;
 
-        public DeviceTypesController(DeviceManagementContext context)
+        public DeviceTypesController(IDeviceTypesService deviceTypesService)
         {
-            _context = context;
+            _deviceTypesService = deviceTypesService;
         }
 
         [HttpGet]
         public ActionResult<List<DeviceType>> GetAll()
         {
-            return Ok(_context.DeviceTypes.ToList());
+            return Ok(_deviceTypesService.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -26,7 +27,7 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var deviceType = _context.DeviceTypes.FirstOrDefault(i => i.Id == id);
+            var deviceType = _deviceTypesService.GetById(id);
 
             if (deviceType == null)
                 return BadRequest("Device type not found");

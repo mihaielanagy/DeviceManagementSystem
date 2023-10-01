@@ -4,7 +4,7 @@ namespace DeviceManagementWeb.Services
 {
     public class RamAmountsService : IRamAmountsService
     {
-        DeviceManagementContext _context;
+        private readonly DeviceManagementContext _context;
         public RamAmountsService(DeviceManagementContext context)
         {
             _context = context;
