@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DeviceManagementWeb.DTOs;
+using DeviceManagementWeb.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace DeviceManagementWeb.Controllers
@@ -7,86 +9,80 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class CitiesController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly ICitiesService _service;
 
-        public CitiesController(DeviceManagementContext context)
+        public CitiesController(ICitiesService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
-        public ActionResult<List<City>> GetAll()
+        public ActionResult<List<CityDto>> GetAll()
         {
-            return Ok(_context.Cities.Include(c => c.IdCountryNavigation).ToList());
+            return Ok(_service.GetAll());
         }
 
         [HttpGet("{id}")]
-        public ActionResult<City> GetById(int id)
+        public ActionResult<CityDto> GetById(int id)
         {
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var city = _context.Cities.Include(c => c.IdCountryNavigation).FirstOrDefault(i => i.Id == id);
+            var city = _service.GetById(id);
 
             if (city == null)
-                return BadRequest("City not found");
+                return NotFound("City not found");
 
             return Ok(city);
         }
 
         [HttpPost]
-        public ActionResult<int> Insert(string cityName, int countryId)
+        public ActionResult<int> Insert(CityDto request)
         {
-            if (string.IsNullOrEmpty(cityName))
+            if (string.IsNullOrEmpty(request.Name))
             {
                 return BadRequest("City name cannot be empty");
             }
 
-            if (countryId < 1)
+            if (request.Country == null)
             {
-                return BadRequest("Country id is invalid");
+                return BadRequest("Country cannot be null.");
             }
 
-            var city = new City
+            var cityId = _service.Insert(request);
+            if (cityId == 0)
             {
-                IdCountry = countryId,
-                Name = cityName
-            };
+                return BadRequest("An error has occured");
+            }
 
-            _context.Cities.Add(city);
-            _context.SaveChanges();
-
-            return Ok(city.Id);
+            return Ok(cityId);
         }
 
         [HttpPut]
-        public ActionResult Update(int cityId, string cityName, int countryId)
+        public ActionResult Update(CityDto request)
         {
-            if (cityId < 1)
+            if (request.Id < 1)
             {
-                return BadRequest("City id is invalid");
+                return BadRequest("City id is invalid.");
             }
 
-            if (string.IsNullOrEmpty(cityName))
+            if (string.IsNullOrEmpty(request.Name))
             {
-                return BadRequest("City name cannot be empty");
+                return BadRequest("City name cannot be empty.");
             }
 
-            if (countryId < 1)
+            if (request.Country == null)
             {
-                return BadRequest("Country id is invalid");
+                return BadRequest("Country cannot be null.");
             }
 
-            var city = _context.Cities.Find(cityId);
-            if (city == null)
-                return BadRequest("City not found");
-
-            city.Name = cityName;
-            city.IdCountry = countryId;
-            _context.Cities.Update(city);
-            _context.SaveChanges();
+            if (_service.Update(request) == 0)
+            {
+                return NotFound("City not found.");
+            }
 
             return Ok();
+
         }
 
         [HttpDelete("{id}")]
@@ -97,12 +93,10 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Id is invalid");
             }
 
-            var city = _context.Cities.Find(id);
-            if (city == null)
-                return BadRequest("Data not found");
-
-            _context.Cities.Remove(city);
-            _context.SaveChanges();
+            if (_service.Delete(id) == 0)
+            {
+                return NotFound("City not found");
+            };
 
             return Ok();
         }

@@ -14,6 +14,10 @@ builder.Services.AddTransient<IProcessorsService, ProcessorsService>();
 builder.Services.AddTransient<IManufacturersService, ManufacturersService>();
 builder.Services.AddTransient<IDeviceTypesService, DeviceTypesService>();
 builder.Services.AddTransient<ICountriesService, CountriesService>();
+builder.Services.AddTransient<ICitiesService, CitiesService>();
+builder.Services.AddTransient<ILocationService, LocationsService>();
+builder.Services.AddTransient<IOperatingSystemsService, OperatingSystemsService>();
+builder.Services.AddTransient<IOsVersionService, OSVersionsService>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>

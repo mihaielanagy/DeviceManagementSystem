@@ -1,5 +1,7 @@
 ﻿using DeviceManagementWeb.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using DeviceManagementWeb.Services.Interfaces;
+
 
 
 namespace DeviceManagementWeb.Controllers
@@ -8,48 +10,97 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class LocationsController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly ILocationService _service;
 
-        public LocationsController(DeviceManagementContext context)
+        public LocationsController(ILocationService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
-        public ActionResult<List<Location>> GetAll()
+        public ActionResult<List<LocationDto>> GetAll()
         {
-            var locations = _context.Locations.ToList();
-            var locationsDto = new List<LocationDto>();
+            var locations = _service.GetAll();
 
-            foreach (var location in locations)
-            {
-                City city = _context.Cities.Find(location.IdCity);
-                Country country = _context.Countries.Find(city.IdCountry);
-
-                var locationDto = new LocationDto
-                {
-                    Id = location.Id,
-                    Address = location.Address,
-                    City = new CityDto { Id = city.Id, Name = city.Name, Country = country }
-                };
-                locationsDto.Add(locationDto);
-            }
-
-            return Ok(locationsDto);
+            return Ok(locations);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Location> GetById(int id)
+        public ActionResult<LocationDto> GetById(int id)
         {
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var location = _context.Locations.Include(c => c.IdCityNavigation).ThenInclude(c => c.IdCountryNavigation).FirstOrDefault(i => i.Id == id);
+            var location = _service.GetById(id);
 
             if (location == null)
                 return BadRequest("Location not found");
 
             return Ok(location);
+        }
+
+        [HttpPost]
+        public ActionResult<int> Insert(LocationDto request)
+        {
+            if (string.IsNullOrEmpty(request.Address))
+            {
+                return BadRequest("Address cannot be empty");
+            }
+
+            if (request.City == null)
+            {
+                return BadRequest("City cannot be null.");
+            }
+
+            var locId = _service.Insert(request);
+            if (locId == 0)
+            {
+                return BadRequest("An error has occured");
+            }
+
+            return Ok(locId);
+        }
+
+        [HttpPut]
+        public ActionResult Update(LocationDto request)
+        {
+            if (request.Id < 1)
+            {
+                return BadRequest("Location id is invalid.");
+            }
+
+            if (string.IsNullOrEmpty(request.Address))
+            {
+                return BadRequest("Address cannot be empty.");
+            }
+
+            if (request.City == null)
+            {
+                return BadRequest("City cannot be null.");
+            }
+
+            if (_service.Update(request) == 0)
+            {
+                return NotFound("Location not found.");
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            if (id < 1)
+            {
+                return BadRequest("Id is invalid");
+            }
+
+            if (_service.Delete(id) == 0)
+            {
+                return NotFound("Location not found.");
+            };
+
+            return Ok();
         }
     }
 }
