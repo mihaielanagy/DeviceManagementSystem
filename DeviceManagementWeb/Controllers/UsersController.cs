@@ -1,5 +1,6 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 using DeviceManagementWeb.DTOs;
+using DeviceManagementWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,40 +11,18 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IUsersService _service;
 
-        public UsersController(DeviceManagementContext context)
+        public UsersController(IUsersService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
-        
+
         public ActionResult<List<UserDto>> GetAll()
         {
-            var users = _context.Users.ToList();
-            var usersDto = new List<UserDto>();
-
-            foreach (var user in users)
-            {
-                Location loc = _context.Locations.Find(user.IdLocation);
-                City city = _context.Cities.Find(loc.IdCity);
-                Country country = _context.Countries.Find(city.IdCountry);
-
-                var userDto = new UserDto
-                {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    Role = _context.Roles.Find(user.IdRole),
-                    Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = city.Id, Country = country } }
-                };
-
-                usersDto.Add(userDto);
-            }
-
-            return Ok(usersDto);
+            return Ok(_service.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -52,24 +31,11 @@ namespace DeviceManagementWeb.Controllers
             if (id < 1)
                 return BadRequest("Invalid Id");
 
-            var user = _context.Users.Find(id);
+            var user = _service.GetById(id);
             if (user == null)
                 return BadRequest("User not found");
-            Location loc = _context.Locations.Find(user.IdLocation);
-            City city = _context.Cities.Find(loc.IdCity);
-            Country country = _context.Countries.Find(city.IdCountry);
 
-            var userDto = new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                Role = _context.Roles.Find(user.IdRole),
-                Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = city.Id, Country = country } }
-            };
-
-            return Ok(userDto);
+            return Ok(user);
         }
 
         [HttpPost]
@@ -77,64 +43,41 @@ namespace DeviceManagementWeb.Controllers
         {
             if (!EmailIsValid(userInsertDto.Email))
                 return BadRequest("Invalid email");
-            
-            var existingUser = _context.Users.FirstOrDefault(u => u.Email == userInsertDto.Email);
+
+            var existingUser = _service.GetByEmail(userInsertDto.Email);
             if (existingUser != null)
                 return BadRequest("User already exists");
 
             if (!PasswordIsValid(userInsertDto.Password))
                 return BadRequest("Password too short. Must contain at least 8 characters");
 
-            User user = new User
-            {
-                FirstName = userInsertDto.FirstName,
-                LastName = userInsertDto.LastName,
-                Email = userInsertDto.Email,
-                Password = userInsertDto.Password,
-                IdLocation = userInsertDto.IdLocation,
-                IdRole = userInsertDto.IdRole
-            };
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
-
-            return Ok(user.Id);
+            return Ok(_service.Insert(userInsertDto));
         }
 
         [HttpPut]
-        public ActionResult<User> Update(UserInsertDto request)
+        public ActionResult<int> Update(UserInsertDto request)
         {
-            var user = _context.Users.Find(request.Id);
+            var user = _service.GetById(request.Id);
             if (user == null)
                 return BadRequest("User not found");
 
-            if (!EmailIsValid(user.Email))
+            if (!EmailIsValid(request.Email))
                 return BadRequest("Invalid email");
 
-            user.FirstName = request.FirstName;
-            user.LastName = request.LastName;
-            user.Email = request.Email;
-            user.IdRole = request.IdRole;
-            user.IdLocation = request.IdLocation;
-            _context.SaveChanges();
-
-            return Ok(_context.Users.Find(user.Id));
+            return Ok(_service.Update(request));
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<List<User>> Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             if (id < 1)
                 return BadRequest("Invalid Id");
 
-            var user = _context.Users.Find(id);
+            var user = _service.GetById(id);
             if (user == null)
                 return BadRequest("User not found");
 
-            _context.Users.Remove(user);
-            _context.SaveChanges();
-
-            return Ok(_context.Users.ToList());
+            return Ok(_service.Delete(id));
         }
 
         private bool EmailIsValid(string email) => email.Contains("@") && email.Contains(".");

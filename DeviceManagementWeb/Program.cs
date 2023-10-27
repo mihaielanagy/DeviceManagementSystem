@@ -18,6 +18,7 @@ builder.Services.AddTransient<ICitiesService, CitiesService>();
 builder.Services.AddTransient<ILocationService, LocationsService>();
 builder.Services.AddTransient<IOperatingSystemsService, OperatingSystemsService>();
 builder.Services.AddTransient<IOsVersionService, OSVersionsService>();
+builder.Services.AddTransient<IUsersService, UsersService>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>
