@@ -10,9 +10,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class CountriesController : ControllerBase
     {
-        private readonly ICountriesService _countriesService;
+        private readonly IDataService<Country> _countriesService;
 
-        public CountriesController(ICountriesService countriesService)
+        public CountriesController(IDataService<Country> countriesService)
         {
             _countriesService = countriesService;
         }
@@ -38,43 +38,41 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPost]
-        public ActionResult Insert(string name)
+        public ActionResult<int> Insert(Country country)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(country.Name))
             {
                 return BadRequest("Country name cannot be empty");
             }
-
-            
+                        
             try
             {
-                var countryId = _countriesService.Insert(name);
+                var countryId = _countriesService.Insert(country);
                 return Ok(countryId);
             }
             catch (Exception)
             {
                 return BadRequest("Country could not be added.");
-            }          
-            
+            }                     
             
         }
 
         [HttpPut]
-        public ActionResult Update(string name, int countryId)
+        public ActionResult<int> Update(Country country)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(country.Name))
             {
                 return BadRequest("Country name cannot be empty");
             }
 
-            if (countryId < 1)
+            if (country.Id < 1)
             {
                 return BadRequest("Country id is invalid");
             }
 
             try
             {
-                _countriesService.Update(name, countryId);
+                return Ok(_countriesService.Update(country));
             }
             catch (ArgumentException ex)
             {
@@ -83,13 +81,11 @@ namespace DeviceManagementWeb.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            }
-
-            return Ok();
+            }            
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             if (id < 1)
             {
@@ -98,7 +94,7 @@ namespace DeviceManagementWeb.Controllers
 
             try
             {
-                _countriesService.Delete(id);
+                return Ok(_countriesService.Delete(id));
             }
             catch (ObjectNotFoundException ex)
             {
@@ -108,8 +104,6 @@ namespace DeviceManagementWeb.Controllers
             {
                 return BadRequest(e.Message);
             }
-
-            return Ok();
         }
     }
 }

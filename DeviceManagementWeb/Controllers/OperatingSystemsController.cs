@@ -1,5 +1,6 @@
 ﻿using DeviceManagementWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 namespace DeviceManagementWeb.Controllers
 {
@@ -15,13 +16,13 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<DeviceManagementDB.Models.OperatingSystem>> GetAll()
+        public ActionResult<List<OperatingSystem>> GetAll()
         {
             return Ok(_service.GetAll());
         }
 
         [HttpGet("{id}")]
-        public ActionResult<DeviceManagementDB.Models.OperatingSystem> GetById(int id)
+        public ActionResult<OperatingSystem> GetById(int id)
         {
             if (id <= 0)
                 return BadRequest("Invalid Id");
@@ -35,7 +36,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPost]
-        public ActionResult<int> Insert(DeviceManagementDB.Models.OperatingSystem request)
+        public ActionResult<int> Insert(OperatingSystem request)
         {
             if (string.IsNullOrEmpty(request.Name))
             {
@@ -52,7 +53,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPut]
-        public ActionResult Update(DeviceManagementDB.Models.OperatingSystem request)
+        public ActionResult<int> Update(OperatingSystem request)
         {
             if (request.Id < 1)
             {
@@ -64,28 +65,32 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Name cannot be empty.");
             }
 
-            if (_service.Update(request) == 0)
+            int rowsAffected = _service.Update(request);
+
+            if (rowsAffected == 0)
             {
                 return NotFound("Operating System not found.");
             }
 
-            return Ok();
+            return Ok(rowsAffected);
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             if (id < 1)
             {
                 return BadRequest("Id is invalid");
             }
 
-            if (_service.Delete(id) == 0)
+            int rowsAffected = _service.Delete(id);
+
+            if (rowsAffected == 0)
             {
                 return NotFound("Operating System not found.");
             };
 
-            return Ok();
+            return Ok(rowsAffected);
         }
     }
 }

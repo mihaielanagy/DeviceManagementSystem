@@ -31,7 +31,7 @@ namespace DeviceManagementWeb.Controllers
             var operatingSystemVersion = _service.GetById(id);
 
             if (operatingSystemVersion == null)
-                return BadRequest("Operating system version not found");
+                return BadRequest("OS Version not found");
 
             return Ok(operatingSystemVersion);
         }
@@ -54,7 +54,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPut]
-        public ActionResult Update(OsVersionDto request)
+        public ActionResult<int> Update(OsVersionDto request)
         {
             if (request.Id < 1)
             {
@@ -68,31 +68,34 @@ namespace DeviceManagementWeb.Controllers
 
             if(request.OS == null)
             {
-                return BadRequest("Operating System cannot be null.");
+                return BadRequest("OS Version cannot be null.");
             }
 
-            if (_service.Update(request) == 0)
+            int rowsAffected = _service.Update(request);
+            if (rowsAffected == 0)
             {
-                return NotFound("Operating System not found.");
+                return NotFound("OS Version not found.");
             }
 
-            return Ok();
+            return Ok(rowsAffected);
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             if (id < 1)
             {
                 return BadRequest("Id is invalid");
             }
 
-            if (_service.Delete(id) == 0)
+            int rowsAffected = _service.Delete(id);
+
+            if (rowsAffected == 0)
             {
-                return NotFound("Operating System Version not found.");
+                return NotFound("OS Version not found.");
             };
 
-            return Ok();
+            return Ok(rowsAffected);
         }
     }
 }

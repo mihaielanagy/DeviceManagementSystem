@@ -6,7 +6,6 @@ namespace DeviceManagementWeb.Services.Interfaces
     {
         List<LocationDto> GetAll();
         LocationDto GetById(int id);
-
         int Insert(LocationDto request);
         int Update(LocationDto request);
         int Delete(int id);

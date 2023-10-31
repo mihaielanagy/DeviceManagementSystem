@@ -1,5 +1,6 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 using DeviceManagementWeb.DTOs;
+using DeviceManagementWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,41 +13,30 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class DevicesController : ControllerBase
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IDevicesService _devicesService;
+        private readonly IUsersService _usersService;
 
-        public DevicesController(DeviceManagementContext context)
+        public DevicesController(IDevicesService devicesService, IUsersService usersService)
         {
-            _context = context;
+            _devicesService = devicesService;
+            _usersService = usersService;
         }
 
         [HttpGet]
         [Authorize]
         public ActionResult<List<DeviceDto>> GetAll()
         {
-            var devices = _context.Devices.ToList();
-            var devicesDto = new List<DeviceDto>();
-
-            foreach (var device in devices)
-            {
-                DeviceDto deviceDto = MapDevice(device);
-
-                devicesDto.Add(deviceDto);
-            }
-
-            return Ok(devicesDto);
+            return Ok(_devicesService.GetAll());
         }
 
         [HttpGet("{id}")]
         [Authorize]
         public ActionResult<DeviceDto> GetById(int id)
         {
-            var device = _context.Devices.Find(id);
-            if (device == null)
-                return BadRequest("Device not found");
+            if (id <= 0)
+                return BadRequest("Id is invalid.");
 
-            DeviceDto deviceDto = MapDevice(device);
-
-            return Ok(deviceDto);
+            return Ok(_devicesService.GetById(id));
         }
 
 
@@ -59,20 +49,11 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Input data is invalid. Device cannot be null.");
             }
 
-            var device = new Device
-            {
-                Name = request.Name,
-                IdDeviceType = request.IdDeviceType,
-                IdManufacturer = request.IdManufacturer,
-                IdOsversion = request.IdOsVersion,
-                IdProcessor = request.IdProcessor,
-                IdRamamount = request.IdRamAmount,
-            };
+            int id = _devicesService.Insert(request);
+            if (id == 0)
+                return BadRequest("An error has occured.");
 
-            _context.Devices.Add(device);
-            _context.SaveChanges();
-
-            return Ok(device.Id);
+            return Ok(id);
         }
 
         [HttpPut]
@@ -84,41 +65,27 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Id is invalid");
             }
 
-            var device = _context.Devices.Find(request.Id);
-            if (device == null)
+            int affectedRows = _devicesService.Update(request);
+            if (affectedRows == 0)
                 return BadRequest("Device not found");
 
-            device.Name = request.Name;
-            device.IdManufacturer = request.IdManufacturer;
-            device.IdProcessor = request.IdProcessor;
-            device.IdDeviceType = request.IdDeviceType;
-            device.IdOsversion = request.IdOsVersion;
-            device.IdRamamount = request.IdRamAmount;
-            device.IdCurrentUser = request.IdUser;
-
-            _context.Devices.Update(device);
-            _context.SaveChanges();
-
-            return Ok(device.Id);
+            return Ok(affectedRows);
         }
 
         [HttpDelete("{id}")]
         [Authorize]
-        public ActionResult<List<DeviceDto>> Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             if (id < 1)
             {
                 return BadRequest("Id is invalid");
             }
 
-            var device = _context.Devices.Find(id);
-            if (device == null)
+            int affectedRows = _devicesService.Delete(id);
+            if (affectedRows == 0)
                 return BadRequest("Device not found");
 
-            _context.Devices.Remove(device);
-            _context.SaveChanges();
-
-            return Ok(GetAll().Result);
+            return Ok(affectedRows);
         }
 
         [HttpPut("assign/{id}")]
@@ -143,8 +110,8 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("User id is invalid");
             }
 
-            var device = _context.Devices.Find(id);
-            var user = _context.Users.Find(userId);
+            var device = _devicesService.GetById(id);
+            var user = _usersService.GetById(userId);
 
             if (user == null)
             {
@@ -156,13 +123,12 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Device not found");
             }
 
-           
-            device.IdCurrentUser = user.Id;
+            int affectedRows = _devicesService.UpdateDeviceUser(device.Id, user.Id);
+            if (affectedRows == 0)
+                return BadRequest("The current user couldn't be assigned.");
 
-            _context.Devices.Update(device);
-            _context.SaveChanges();
 
-            return Ok(device.Id);
+            return Ok(affectedRows);
         }
 
         [HttpPut("unassign/{id}")]
@@ -174,58 +140,18 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Device id is invalid");
             }
 
-            var device = _context.Devices.Find(id);
+            var device = _devicesService.GetById(id);
 
             if (device == null)
             {
                 return BadRequest("Device not found");
             }
 
-            device.IdCurrentUser = null;
+            int affectedRows = _devicesService.UpdateDeviceUser(device.Id, null);
+            if (affectedRows == 0)
+                return BadRequest("An error has occured.");
 
-            _context.Devices.Update(device);
-            _context.SaveChanges();
-
-            return Ok(device.Id);
-        }
-
-        private DeviceDto MapDevice(Device device)
-        {
-            User user = null;
-            Location loc = null;
-            City city = null;
-            Country country = null;
-            if (device.IdCurrentUser != null)
-            {
-                user = _context.Users.Find(device.IdCurrentUser);
-                loc = _context.Locations.Find(user.IdLocation);
-                city = _context.Cities.Find(loc.IdCity);
-                country = _context.Countries.Find(city.IdCountry);
-            }
-            OperatingSystemVersion osv = _context.OperatingSystemVersions.Find(device.IdOsversion);
-            OperatingSystem os = _context.OperatingSystems.Find(osv.IdOs);
-
-
-            var deviceDto = new DeviceDto
-            {
-                Id = device.Id,
-                Name = device.Name,
-                DeviceType = _context.DeviceTypes.Find(device.IdDeviceType),
-                Manufacturer = _context.Manufacturers.Find(device.IdManufacturer),
-                OsVersion = new OsVersionDto { Id = osv.Id, Name = osv.Name, OS = os },
-                Processor = _context.Processors.Find(device.IdProcessor),
-                RamAmount = _context.Ramamounts.Find(device.IdRamamount),
-                User = user != null ? new UserDto
-                {
-                    Email = user.Email,
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Role = _context.Roles.Find(user.IdRole),
-                    Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = city.Id, Country = country } },
-                } : null
-            };
-            return deviceDto;
+            return Ok(affectedRows);
         }
     }
 }

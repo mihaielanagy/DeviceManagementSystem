@@ -50,8 +50,12 @@ namespace DeviceManagementWeb.Controllers
 
             if (!PasswordIsValid(userInsertDto.Password))
                 return BadRequest("Password too short. Must contain at least 8 characters");
+            var userId = _service.Insert(userInsertDto);
 
-            return Ok(_service.Insert(userInsertDto));
+            if (userId == 0)
+                return BadRequest("An error has occured");
+
+            return Ok(userId);
         }
 
         [HttpPut]
@@ -64,7 +68,11 @@ namespace DeviceManagementWeb.Controllers
             if (!EmailIsValid(request.Email))
                 return BadRequest("Invalid email");
 
-            return Ok(_service.Update(request));
+            int affectedRows = _service.Update(request);
+            if(affectedRows == 0)
+                return BadRequest("An error has occured");
+
+            return Ok(affectedRows);
         }
 
         [HttpDelete("{id}")]
@@ -77,12 +85,15 @@ namespace DeviceManagementWeb.Controllers
             if (user == null)
                 return BadRequest("User not found");
 
-            return Ok(_service.Delete(id));
+            int affectedRows = _service.Delete(id);
+            if (affectedRows == 0)
+                return BadRequest("An error has occured");
+
+            return Ok(affectedRows);
         }
 
         private bool EmailIsValid(string email) => email.Contains("@") && email.Contains(".");
         private bool PasswordIsValid(string password) => password.Length >= 8;
-
 
     }
 }

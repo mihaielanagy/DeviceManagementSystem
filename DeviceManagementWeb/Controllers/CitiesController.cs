@@ -9,9 +9,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class CitiesController : ControllerBase
     {
-        private readonly ICitiesService _service;
+        private readonly IDataService<CityDto> _service;
 
-        public CitiesController(ICitiesService service)
+        public CitiesController(IDataService<CityDto> service)
         {
             _service = service;
         }
@@ -59,7 +59,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPut]
-        public ActionResult Update(CityDto request)
+        public ActionResult<int> Update(CityDto request)
         {
             if (request.Id < 1)
             {
@@ -76,29 +76,31 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Country cannot be null.");
             }
 
-            if (_service.Update(request) == 0)
+            int rowsAffected = _service.Update(request);
+            if (rowsAffected == 0)
             {
                 return NotFound("City not found.");
             }
 
-            return Ok();
+            return Ok(rowsAffected);
 
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             if (id < 1)
             {
                 return BadRequest("Id is invalid");
             }
 
-            if (_service.Delete(id) == 0)
+            int rowsAffected = _service.Delete(id);
+            if (rowsAffected == 0)
             {
                 return NotFound("City not found");
             };
 
-            return Ok();
+            return Ok(rowsAffected);
         }
     }
 }

@@ -1,86 +1,85 @@
-﻿using DeviceManagementWeb.Services.Interfaces;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.Services.Interfaces;
 using System.Data;
 using System.Data.Entity.Core;
 
 namespace DeviceManagementWeb.Services
 {
-    public class CountriesService : ICountriesService
+    public class CountriesService : IDataService<Country>
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IBaseRepository<Country> _repository;
 
-        public CountriesService(DeviceManagementContext context)
+        public CountriesService(IBaseRepository<Country> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public List<Country> GetAll()
         {
-            return _context.Countries.ToList();
+            return _repository.GetAll();
         }
 
         public Country GetById(int id)
         {
             if (id <= 0)
                 return null;
-            
-            return _context.Countries.FirstOrDefault(i => i.Id == id);
+
+            return _repository.GetById(id);
         }
 
-        public int Insert(string name)
+        public int Insert(Country country)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(country.Name))
             {
-               throw new ArgumentException("Country name cannot be empty");
+                throw new ArgumentException("Country name cannot be empty");
             }
 
-            var country = new Country
-            {
-                Name = name
-            };
 
-            _context.Countries.Add(country);
-            _context.SaveChanges();
+            _repository.Insert(country);
 
             return country.Id;
         }
 
-       
-        public void Update(string name, int countryId) 
+
+        public int Update(Country country)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(country.Name))
             {
-                throw new ArgumentException("Country name cannot be null", nameof(name));
+                throw new ArgumentException("Country name cannot be null", nameof(country.Name));
             }
 
-            if (countryId < 1)
+            if (country.Id < 1)
             {
-                throw new ArgumentException("Country id is invalid", nameof(countryId));
+                throw new ArgumentException("Country id is invalid", nameof(country.Id));
             }
 
-            var country = _context.Countries.Find(countryId);
             if (country == null)
+            {
+                throw new ArgumentException("Country cannot be null");
+            }
+
+            var dbCountry = _repository.GetById(country.Id);
+            if(dbCountry == null)
             {
                 throw new ObjectNotFoundException("Country not found in the database.");
             }
-
-            country.Name = name;
-            _context.Countries.Update(country);
-            _context.SaveChanges();
+                        
+            return _repository.Update(country);
         }
 
-        public void Delete(int id) 
+        public int Delete(int id)
         {
             if (id < 1)
             {
                 throw new ArgumentException("Country id is invalid", nameof(id));
             }
 
-            var country = _context.Countries.Find(id);
+            var country = _repository.GetById(id);
             if (country == null)
                 throw new ObjectNotFoundException("Country id not found in the database.");
 
-            _context.Countries.Remove(country);
-            _context.SaveChanges();
+            
+            return _repository.Delete(country.Id);
         }
 
     }

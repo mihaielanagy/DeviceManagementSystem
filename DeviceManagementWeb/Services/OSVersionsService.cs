@@ -98,14 +98,14 @@ namespace DeviceManagementWeb.Services
 
         private OsVersionDto MapOSVersion(OperatingSystemVersion request)
         {
-            var OSV = new OsVersionDto
+            var osv = new OsVersionDto
             {
                 Id = request.Id,
                 Name = request.Name,
                 OS = _context.OperatingSystems.Find(request.IdOs),
             };
 
-            return OSV;
+            return osv;
         }
     }
 }

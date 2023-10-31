@@ -62,7 +62,7 @@ namespace DeviceManagementWeb.Controllers
         }
 
         [HttpPut]
-        public ActionResult Update(LocationDto request)
+        public ActionResult<int> Update(LocationDto request)
         {
             if (request.Id < 1)
             {
@@ -79,28 +79,33 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("City cannot be null.");
             }
 
-            if (_service.Update(request) == 0)
+            int affectedRows = _service.Update(request);
+
+            if (affectedRows == 0)
             {
                 return NotFound("Location not found.");
             }
 
-            return Ok();
+            return Ok(affectedRows);
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             if (id < 1)
             {
                 return BadRequest("Id is invalid");
             }
 
-            if (_service.Delete(id) == 0)
+            int affectedRows = _service.Delete(id);
+
+
+            if (affectedRows == 0)
             {
                 return NotFound("Location not found.");
             };
 
-            return Ok();
+            return Ok(affectedRows);
         }
     }
 }

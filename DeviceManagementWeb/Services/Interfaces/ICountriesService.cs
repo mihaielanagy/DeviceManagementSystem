@@ -6,7 +6,7 @@
         Country GetById(int id);
         int Insert(string name);
 
-        void Update(string name, int countryId);
-        void Delete(int id);
+        int Update(string name, int countryId);
+        int Delete(int id);
     }
 }

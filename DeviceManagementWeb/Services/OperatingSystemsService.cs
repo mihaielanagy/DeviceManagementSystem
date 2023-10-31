@@ -1,4 +1,5 @@
 ﻿using DeviceManagementWeb.Services.Interfaces;
+using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 namespace DeviceManagementWeb.Services
 {
@@ -11,12 +12,12 @@ namespace DeviceManagementWeb.Services
             _context = context;
         }
 
-        public List<DeviceManagementDB.Models.OperatingSystem> GetAll()
+        public List<OperatingSystem> GetAll()
         {
             return _context.OperatingSystems.ToList();
         }
 
-        public DeviceManagementDB.Models.OperatingSystem GetById(int id)
+        public OperatingSystem GetById(int id)
         {
             if (id <= 0)
                 return null;
@@ -26,7 +27,7 @@ namespace DeviceManagementWeb.Services
             return operatingSystem;
         }
 
-        public int Insert(DeviceManagementDB.Models.OperatingSystem request)
+        public int Insert(OperatingSystem request)
         {
             if (string.IsNullOrEmpty(request.Name))
             {
@@ -39,7 +40,7 @@ namespace DeviceManagementWeb.Services
             return request.Id;
         }
 
-        public int Update(DeviceManagementDB.Models.OperatingSystem request)
+        public int Update(OperatingSystem request)
         {
             if (request == null || request.Id == 0)
             {
