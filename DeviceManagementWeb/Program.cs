@@ -14,9 +14,6 @@ builder.Services.AddSingleton<ILoggingService, LoggingService>();
 builder.Services.AddTransient<IRolesService, RolesService>();
 builder.Services.AddTransient<IRamAmountsService, RamAmountsService>();
 builder.Services.AddTransient<IProcessorsService, ProcessorsService>();
-builder.Services.AddTransient<IManufacturersService, ManufacturersService>();
-builder.Services.AddTransient<IDeviceTypesService, DeviceTypesService>();
-builder.Services.AddTransient<ICitiesService, CitiesService>();
 builder.Services.AddTransient<ILocationService, LocationsService>();
 builder.Services.AddTransient<IOperatingSystemsService, OperatingSystemsService>();
 builder.Services.AddTransient<IOsVersionService, OSVersionsService>();
@@ -25,9 +22,13 @@ builder.Services.AddTransient<IDevicesService, DevicesService>();
 
 builder.Services.AddTransient<IDataService<CityDto>, CitiesService3>();
 builder.Services.AddTransient<IDataService<Country>, CountriesService>();
+builder.Services.AddTransient<IDataService<DeviceType>, DeviceTypesService>();
+builder.Services.AddTransient<IDataService<Manufacturer>, ManufacturersService>();
 
 builder.Services.AddTransient<IBaseRepository<City>, BaseRepository<City>>();
 builder.Services.AddTransient<IBaseRepository<Country>, BaseRepository<Country>>();
+builder.Services.AddTransient<IBaseRepository<DeviceType>, BaseRepository<DeviceType>>();
+builder.Services.AddTransient<IBaseRepository<Manufacturer>, BaseRepository<Manufacturer>>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>

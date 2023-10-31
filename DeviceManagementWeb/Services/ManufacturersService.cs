@@ -1,25 +1,27 @@
-﻿using DeviceManagementWeb.Services.Interfaces;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.Services.Interfaces;
 
 namespace DeviceManagementWeb.Services
 {
-    public class ManufacturersService: IManufacturersService
+    public class ManufacturersService : IDataService<Manufacturer>
     {
-        private readonly DeviceManagementContext _context;
-        public ManufacturersService(DeviceManagementContext context)
+        private readonly IBaseRepository<Manufacturer> _repository;
+        public ManufacturersService(IBaseRepository<Manufacturer> repository)
         {
-            _context = context;
+            _repository = repository;
         }
         public List<Manufacturer> GetAll()
         {
-            return _context.Manufacturers.ToList();
+            return _repository.GetAll();
         }
+
 
         public Manufacturer GetById(int id)
         {
             if (id <= 0)
                 return null;
 
-            return _context.Manufacturers.FirstOrDefault(i => i.Id == id);
+            return _repository.GetById(id);
         }
 
         public int Insert(Manufacturer request)
@@ -29,24 +31,28 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var existingManufacturer = _context.Manufacturers.FirstOrDefault(x => x.Name == request.Name);
-            if (existingManufacturer != null)
-                return 0;
+            //var existingManufacturer = _context.Manufacturers.FirstOrDefault(x => x.Name == request.Name);
+            // if (existingManufacturer != null)
+            //return 0;
 
-            _context.Manufacturers.Add(request);
-            _context.SaveChanges();
+            _repository.Insert(request);
             return request.Id;
         }
 
         public int Update(Manufacturer request)
         {
-            if(request == null || request.Id <= 0 || string.IsNullOrEmpty(request.Name))
+            if (request == null || request.Id <= 0 || string.IsNullOrEmpty(request.Name))
             {
                 return 0;
             }
 
-            _context.Manufacturers.Update(request);
-            return _context.SaveChanges();
+            Manufacturer manufacturer = _repository.GetById(request.Id);
+            if (manufacturer == null)
+                return 0;
+
+            manufacturer.Name = request.Name;
+
+            return _repository.Update(manufacturer);
         }
 
         public int Delete(int id)
@@ -56,14 +62,13 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var manufacturer = _context.Manufacturers.Find(id);
-            if(manufacturer == null)
+            var manufacturer = _repository.GetById(id);
+            if (manufacturer == null)
             {
                 return 0;
             }
 
-            _context.Manufacturers.Remove(manufacturer);
-            return _context.SaveChanges();
+            return _repository.Delete(id);
         }
     }
 }

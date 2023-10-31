@@ -43,7 +43,7 @@ namespace DeviceManagementDB.Repositories
 
         public int Update(TEntity request)
         {
-            DbEntity.Update(request);
+            _context.Update(request);
             return _context.SaveChanges();
         }
     }

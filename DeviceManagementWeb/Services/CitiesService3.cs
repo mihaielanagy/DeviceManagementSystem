@@ -81,6 +81,9 @@ namespace DeviceManagementWeb.Services
             }
 
             var city = _repository.GetById(request.Id);
+            if (city == null)
+                throw new ObjectNotFoundException("City not found in the database");
+
             city.Name = request.Name;
             city.IdCountry = request.Country.Id;
 

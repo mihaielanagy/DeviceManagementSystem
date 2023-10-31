@@ -8,9 +8,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class ManufacturersController : ControllerBase
     {
-        private readonly  IManufacturersService _manufacturersService;
+        private readonly  IDataService<Manufacturer> _manufacturersService;
 
-        public ManufacturersController(IManufacturersService manufacturersService)
+        public ManufacturersController(IDataService<Manufacturer> manufacturersService)
         {
             _manufacturersService = manufacturersService;
         }

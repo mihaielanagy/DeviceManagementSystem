@@ -1,19 +1,19 @@
-﻿using DeviceManagementWeb.Services.Interfaces;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.Services.Interfaces;
 
 namespace DeviceManagementWeb.Services
 {
-    public class DeviceTypesService : IDeviceTypesService
+    public class DeviceTypesService : IDataService<DeviceType>
     {
-        private readonly DeviceManagementContext _context;
-
-        public DeviceTypesService(DeviceManagementContext context)
+        private readonly IBaseRepository<DeviceType> _repository;
+        public DeviceTypesService(IBaseRepository<DeviceType> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public List<DeviceType> GetAll()
         {
-            return _context.DeviceTypes.ToList();
+            return _repository.GetAll();
         }
 
         public DeviceType GetById(int id)
@@ -21,7 +21,7 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            return _context.DeviceTypes.Find(id);
+            return _repository.GetById(id);
         }
 
         public int Insert(DeviceType request)
@@ -31,12 +31,11 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var existingDt = _context.DeviceTypes.FirstOrDefault(x => x.Name == request.Name);
+            var existingDt = _repository.GetById(request.Id);
             if (existingDt != null)
                 return 0;
 
-            _context.DeviceTypes.Add(request);
-            _context.SaveChanges();
+            _repository.Insert(request);
             return request.Id;
         }
 
@@ -47,8 +46,13 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            _context.DeviceTypes.Update(request);
-            return _context.SaveChanges();
+            var dbItem = _repository.GetById(request.Id);
+            if (dbItem == null)
+                return 0;
+
+            dbItem.Name = request.Name;
+
+            return _repository.Update(dbItem);
         }
 
         public int Delete(int id)
@@ -58,14 +62,14 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var deviceType = _context.DeviceTypes.Find(id);
+            var deviceType = _repository.GetById(id);
+
             if (deviceType == null)
             {
                 return 0;
             }
 
-            _context.DeviceTypes.Remove(deviceType);
-            return _context.SaveChanges();
+            return _repository.Delete(id);
         }
     }
 }

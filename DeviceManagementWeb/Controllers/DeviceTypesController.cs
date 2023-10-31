@@ -8,9 +8,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class DeviceTypesController : ControllerBase
     {
-        private readonly IDeviceTypesService _deviceTypesService;
+        private readonly IDataService<DeviceType> _deviceTypesService;
 
-        public DeviceTypesController(IDeviceTypesService deviceTypesService)
+        public DeviceTypesController(IDataService<DeviceType> deviceTypesService)
         {
             _deviceTypesService = deviceTypesService;
         }

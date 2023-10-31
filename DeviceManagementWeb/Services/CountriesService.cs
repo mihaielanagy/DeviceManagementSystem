@@ -34,7 +34,6 @@ namespace DeviceManagementWeb.Services
                 throw new ArgumentException("Country name cannot be empty");
             }
 
-
             _repository.Insert(country);
 
             return country.Id;
@@ -63,8 +62,10 @@ namespace DeviceManagementWeb.Services
             {
                 throw new ObjectNotFoundException("Country not found in the database.");
             }
+
+            dbCountry.Name = country.Name;
                         
-            return _repository.Update(country);
+            return _repository.Update(dbCountry);
         }
 
         public int Delete(int id)
