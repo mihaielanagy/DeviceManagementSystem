@@ -1,18 +1,19 @@
-﻿using DeviceManagementWeb.Services.Interfaces;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.Services.Interfaces;
 
 namespace DeviceManagementWeb.Services
 {
-    public class RolesService : IRolesService
+    public class RolesService : IDataService<Role>
     {
-        private readonly DeviceManagementContext _context;
-        public RolesService(DeviceManagementContext context)
+        private readonly IBaseRepository<Role> _repository;
+        public RolesService(IBaseRepository<Role> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public List<Role> GetAll()
         {
-            return _context.Roles.ToList();
+            return _repository.GetAll();
         }
 
         public Role GetById(int id)
@@ -20,7 +21,7 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            return _context.Roles.FirstOrDefault(i => i.Id == id);
+            return _repository.GetById(id);
         }
 
         public int Insert(Role request)
@@ -30,12 +31,11 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var existingRole = _context.Roles.FirstOrDefault(x => x.Name == request.Name);
-            if (existingRole != null)
-                return 0;
+            //var existingRole = _context.Roles.FirstOrDefault(x => x.Name == request.Name);
+            //if (existingRole != null)
+            //    return 0;
 
-            _context.Roles.Add(request);
-            _context.SaveChanges();
+            _repository.Insert(request);
             return request.Id;
         }
 
@@ -46,8 +46,11 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            _context.Roles.Update(request);
-            return _context.SaveChanges();
+            var dbItem = _repository.GetById(request.Id);
+            if (dbItem == null)
+                return 0;
+
+            return _repository.Update(dbItem);
         }
 
         public int Delete(int id)
@@ -57,14 +60,13 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var role = _context.Roles.Find(id);
+            var role = _repository.GetById(id);
             if (role == null)
             {
                 return 0;
             }
 
-            _context.Roles.Remove(role);
-            return _context.SaveChanges();
+            return _repository.Delete(id);
         }
     }
 }

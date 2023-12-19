@@ -8,10 +8,10 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class RolesController : ControllerBase
     {
-        private readonly IRolesService _rolesService;
+        private readonly IDataService<Role> _rolesService;
         private readonly ILoggingService _loggingService;
 
-        public RolesController(IRolesService rolesService, ILoggingService loggingService)
+        public RolesController(IDataService<Role> rolesService, ILoggingService loggingService)
         {
             _rolesService = rolesService;
             _loggingService = loggingService;

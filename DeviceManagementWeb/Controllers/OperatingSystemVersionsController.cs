@@ -9,9 +9,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class OperatingSystemVersionsController : ControllerBase
     {
-        private readonly IOsVersionService _service;
+        private readonly IDataService<OsVersionDto> _service;
 
-        public OperatingSystemVersionsController(IOsVersionService service)
+        public OperatingSystemVersionsController(IDataService<OsVersionDto> service)
         {
             _service = service;
         }

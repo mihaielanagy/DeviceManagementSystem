@@ -1,20 +1,30 @@
-﻿using DeviceManagementWeb.DTOs;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 
 namespace DeviceManagementWeb.Services
 {
     public class UsersService : IUsersService
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IBaseRepository<User> _userRepository;
+        private readonly IBaseRepository<Location> _locationRepository;
+        private readonly IBaseRepository<City> _cityRepository;
+        private readonly IBaseRepository<Country> _countryRepository;
+        private readonly IBaseRepository<Role> _roleRepository;
 
-        public UsersService(DeviceManagementContext context)
+        public UsersService(IBaseRepository<User> userRepository, IBaseRepository<Country> countryRepository, 
+            IBaseRepository<City> cityRepository, IBaseRepository<Location> locationRepository, IBaseRepository<Role> roleRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
+            _countryRepository = countryRepository;
+            _cityRepository = cityRepository;
+            _locationRepository = locationRepository;
+            _roleRepository = roleRepository;
         }
 
         public List<UserDto> GetAll()
         {
-            var users = _context.Users.ToList();
+            var users = _userRepository.GetAll();
             var usersDto = new List<UserDto>();
 
             foreach (var user in users)
@@ -31,7 +41,7 @@ namespace DeviceManagementWeb.Services
             if (id < 1)
                return null;
 
-            var user = _context.Users.Find(id);
+            var user = _userRepository.GetById(id);
             if (user == null)
                 return null;
 
@@ -40,26 +50,26 @@ namespace DeviceManagementWeb.Services
             return userDto;
         }
 
-        public UserDto GetByEmail(string email)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+        //public UserDto GetByEmail(string email)
+        //{
+        //    var user = _context.Users.FirstOrDefault(u => u.Email == email);
 
-            if (user == null)
-                return null;
+        //    if (user == null)
+        //        return null;
 
-            var userDto = MapUser(user);
+        //    var userDto = MapUser(user);
 
-            return userDto;
-        }
+        //    return userDto;
+        //}
         public int Insert(UserInsertDto userInsertDto)
         {
             if (!EmailIsValid(userInsertDto.Email))
                 return 0;
 
-            var existingUser = _context.Users.FirstOrDefault(u => u.Email == userInsertDto.Email);
-            if (existingUser != null)
-                return 0;
-            //throw exceptions instead of returning 0?
+            //var existingUser = _context.Users.FirstOrDefault(u => u.Email == userInsertDto.Email);
+           // if (existingUser != null)
+                //return 0;
+            
 
             if (!PasswordIsValid(userInsertDto.Password))
                 return 0;
@@ -74,15 +84,14 @@ namespace DeviceManagementWeb.Services
                 IdRole = userInsertDto.IdRole
             };
 
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            _userRepository.Insert(user);
 
             return user.Id;
         }
 
         public int Update(UserInsertDto request)
         {
-            var user = _context.Users.Find(request.Id);
+            var user = _userRepository.GetById(request.Id);
             if (user == null)
                 return 0;
 
@@ -95,8 +104,8 @@ namespace DeviceManagementWeb.Services
             user.IdRole = request.IdRole;
             user.IdLocation = request.IdLocation;
             
-
-            return _context.SaveChanges(); ;
+            int affectedRows = _userRepository.Update(user);
+            return affectedRows;
         }
 
         public int Delete(int id)
@@ -104,14 +113,13 @@ namespace DeviceManagementWeb.Services
             if (id < 1)
                 return 0;
 
-            var user = _context.Users.Find(id);
+            var user = _userRepository.GetById(id);
             if (user == null)
                 return 0;
 
-            _context.Users.Remove(user);
-            
+            int affectedRows = _userRepository.Delete(id);            
 
-            return _context.SaveChanges();
+            return affectedRows;
         }
 
         private bool EmailIsValid(string email) => email.Contains("@") && email.Contains(".");
@@ -119,9 +127,9 @@ namespace DeviceManagementWeb.Services
 
         private UserDto MapUser(User request)
         {
-            Location loc = _context.Locations.Find(request.IdLocation);
-            City city = _context.Cities.Find(loc.IdCity);
-            Country country = _context.Countries.Find(city.IdCountry);
+            Location loc = _locationRepository.GetById(request.IdLocation);
+            City city = _cityRepository.GetById(loc.IdCity);
+            Country country = _countryRepository.GetById(city.IdCountry);
 
             var userDto = new UserDto
             {
@@ -129,7 +137,7 @@ namespace DeviceManagementWeb.Services
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
-                Role = _context.Roles.Find(request.IdRole),
+                Role = _roleRepository.GetById(request.IdRole),
                 Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = loc.IdCity, Name = city.Name, Country = country } }
             };
 

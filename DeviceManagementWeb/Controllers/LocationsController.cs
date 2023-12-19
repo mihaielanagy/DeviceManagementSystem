@@ -10,9 +10,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class LocationsController : ControllerBase
     {
-        private readonly ILocationService _service;
+        private readonly IDataService<LocationDto> _service;
 
-        public LocationsController(ILocationService service)
+        public LocationsController(IDataService<LocationDto> service)
         {
             _service = service;
         }

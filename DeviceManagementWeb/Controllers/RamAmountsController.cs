@@ -7,9 +7,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class RamAmountsController : ControllerBase
     {
-        private readonly IRamAmountsService _ramAmountsService;
+        private readonly IDataService<Ramamount> _ramAmountsService;
 
-        public RamAmountsController(IRamAmountsService ramAmountsService)
+        public RamAmountsController(IDataService<Ramamount> ramAmountsService)
         {
             _ramAmountsService = ramAmountsService;
         }

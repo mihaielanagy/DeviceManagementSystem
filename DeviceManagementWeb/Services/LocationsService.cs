@@ -1,21 +1,26 @@
-﻿using DeviceManagementWeb.DTOs;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 using System.Data.Entity.Core;
 
 namespace DeviceManagementWeb.Services
 {
-    public class LocationsService : ILocationService
+    public class LocationsService : IDataService<LocationDto>
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IBaseRepository<Location> _locationRepository;
+        private readonly IBaseRepository<City> _cityRepository;
+        private readonly IBaseRepository<Country> _countryRepository;
 
-        public LocationsService(DeviceManagementContext context)
+        public LocationsService(IBaseRepository<Location> locationRepository, IBaseRepository<City> cityRepository, IBaseRepository<Country> countryRepository)
         {
-            _context = context;
+            _locationRepository = locationRepository;
+            _cityRepository = cityRepository;
+            _countryRepository = countryRepository;
         }
 
         public List<LocationDto> GetAll()
         {
-            var locations = _context.Locations.ToList();
+            var locations = _locationRepository.GetAll();
             var locationsDto = new List<LocationDto>();
 
             foreach (var location in locations)
@@ -31,7 +36,7 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            var location = _context.Locations.FirstOrDefault(i => i.Id == id);
+            var location = _locationRepository.GetById(id);
 
             if (location == null)
                 return null;
@@ -57,8 +62,7 @@ namespace DeviceManagementWeb.Services
                 IdCity = request.City.Id,
             };
 
-            _context.Locations.Add(location);
-            _context.SaveChanges();
+            _locationRepository.Insert(location);
 
             return location.Id;
         }
@@ -75,12 +79,12 @@ namespace DeviceManagementWeb.Services
                 throw new ArgumentException("Id is invalid");
             }
 
-            var location = _context.Locations.Find(request.Id);
+            var location = _locationRepository.GetById(request.Id);
             location.Address = request.Address;
             location.IdCity = request.City.Id;
 
-            _context.Locations.Update(location);
-            return _context.SaveChanges();
+            int affectedRows = _locationRepository.Update(location);
+            return affectedRows;
         }
 
         public int Delete(int id)
@@ -90,19 +94,19 @@ namespace DeviceManagementWeb.Services
                 throw new ArgumentException("Location id is invalid", nameof(id));
             }
 
-            var location = _context.Locations.Find(id);
+            var location = _locationRepository.GetById(id);
             if (location == null)
                 throw new ObjectNotFoundException("Location not found in the database.");
 
-            _context.Locations.Remove(location);
+            int affectedRows = _locationRepository.Delete(id);
 
-            return _context.SaveChanges();
+            return affectedRows;
         }
 
         private LocationDto MapLocation(Location request)
         {
-            City city = _context.Cities.Find(request.IdCity);
-            Country country = _context.Countries.Find(city.IdCountry);
+            City city = _cityRepository.GetById(request.IdCity);
+            Country country = _countryRepository.GetById(city.IdCountry);
 
             var locationDto = new LocationDto
             {

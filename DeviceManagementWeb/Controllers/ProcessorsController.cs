@@ -7,9 +7,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class ProcessorsController : ControllerBase
     {
-        private readonly IProcessorsService _processorsService;
+        private readonly IDataService<Processor> _processorsService;
 
-        public ProcessorsController(IProcessorsService processorsService)
+        public ProcessorsController(IDataService<Processor> processorsService)
         {
             _processorsService = processorsService;
         }

@@ -1,21 +1,24 @@
-﻿using DeviceManagementWeb.DTOs;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 using System.Data.Entity.Core;
 
 namespace DeviceManagementWeb.Services
 {
-    public class CitiesService : ICitiesService
+    public class CitiesService :IDataService<CityDto>
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IBaseRepository<City> _repository;
+        private readonly IBaseRepository<Country> _countryRepository;
 
-        public CitiesService(DeviceManagementContext context)
+        public CitiesService(IBaseRepository<City> repository, IBaseRepository<Country> countryRepository)
         {
-            _context = context;
+            _repository = repository;
+            _countryRepository = countryRepository;
         }
 
         public List<CityDto> GetAll()
         {
-            var cities = _context.Cities.ToList();
+            var cities = _repository.GetAll();
             var citiesDto = new List<CityDto>();
             foreach (var city in cities)
             {
@@ -30,14 +33,9 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            var city = _context.Cities.FirstOrDefault(i => i.Id == id);
+            var city = _repository.GetById(id);
 
-            CityDto cityDto = new CityDto
-            {
-                Id = id,
-                Name = city.Name,
-                Country = _context.Countries.Find(city.IdCountry)
-            };
+            CityDto cityDto = MapCity(city);
 
             return cityDto;
         }
@@ -49,25 +47,23 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            if(request.Country.Id < 1)
+            if (request.Country.Id < 1)
             {
                 return 0;
             }
 
-            if(request.Country == null)
+            if (request.Country == null)
             {
                 return 0;
             }
-            
+
             var city = new City
             {
                 Name = request.Name,
                 IdCountry = request.Country.Id,
             };
 
-            _context.Cities.Add(city);
-            _context.SaveChanges();
-
+            _repository.Insert(city);
             return city.Id;
         }
 
@@ -79,17 +75,19 @@ namespace DeviceManagementWeb.Services
                 throw new ObjectNotFoundException("City cannot be null");
             }
 
-            if(request.Id <= 0)
+            if (request.Id <= 0)
             {
                 throw new ArgumentException("Id is invalid");
             }
 
-            var city = _context.Cities.Find(request.Id);
+            var city = _repository.GetById(request.Id);
+            if (city == null)
+                throw new ObjectNotFoundException("City not found in the database");
+
             city.Name = request.Name;
             city.IdCountry = request.Country.Id;
-                        
-            _context.Cities.Update(city);
-            return _context.SaveChanges();
+
+            return _repository.Update(city);
         }
 
         public int Delete(int id)
@@ -99,13 +97,11 @@ namespace DeviceManagementWeb.Services
                 throw new ArgumentException("City id is invalid", nameof(id));
             }
 
-            var city = _context.Cities.Find(id);
+            var city = _repository.GetById(id);
             if (city == null)
                 throw new ObjectNotFoundException("City id not found in the database.");
-
-            _context.Cities.Remove(city);
-            
-            return _context.SaveChanges();
+                        
+            return _repository.Delete(city.Id);
         }
 
         public CityDto MapCity(City city)
@@ -114,7 +110,7 @@ namespace DeviceManagementWeb.Services
             {
                 Id = city.Id,
                 Name = city.Name,
-                Country = _context.Countries.Find(city.IdCountry)
+                Country = _countryRepository.GetById(city.IdCountry)
             };
 
             return cityDto;

@@ -1,21 +1,25 @@
-﻿using DeviceManagementWeb.DTOs;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
+using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 namespace DeviceManagementWeb.Services
 {
-    public class OSVersionsService : IOsVersionService
+    public class OSVersionsService : IDataService<OsVersionDto>
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IBaseRepository<OperatingSystemVersion> _repository;
+        private readonly IBaseRepository<OperatingSystem> _osRepository;
 
-        public OSVersionsService(DeviceManagementContext context)
+        public OSVersionsService(IBaseRepository<OperatingSystemVersion> repository, IBaseRepository<OperatingSystem> osRepository)
         {
-            _context = context;
+            _repository = repository;
+            _osRepository = osRepository;
         }
 
         public List<OsVersionDto> GetAll()
         {
             var OSVList = new List<OsVersionDto>();
-            var dbList = _context.OperatingSystemVersions.ToList();
+            var dbList = _repository.GetAll();
 
             foreach (var OSV in dbList)
             {
@@ -31,7 +35,7 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            var operatingSystemVersion = _context.OperatingSystemVersions.Find(id);
+            var operatingSystemVersion = _repository.GetById(id);
 
             return MapOSVersion(operatingSystemVersion);
         }
@@ -54,8 +58,7 @@ namespace DeviceManagementWeb.Services
                 IdOs = request.OS.Id,
             };
 
-            _context.OperatingSystemVersions.Add(osv);
-            _context.SaveChanges();
+            _repository.Insert(osv);
 
             return osv.Id;
         }
@@ -72,12 +75,11 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var osv = _context.OperatingSystemVersions.Find(request.Id);
+            var osv = _repository.GetById(request.Id);
             osv.Name = request.Name;
             osv.IdOs = request.OS.Id;
 
-            _context.OperatingSystemVersions.Update(osv);
-            return _context.SaveChanges();
+            return _repository.Update(osv);
         }
 
         public int Delete(int id)
@@ -87,13 +89,11 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var osv = _context.OperatingSystemVersions.Find(id);
+            var osv = _repository.GetById(id);
             if (osv == null)
                 return 0;
 
-            _context.OperatingSystemVersions.Remove(osv);
-
-            return _context.SaveChanges();
+            return _repository.Delete(id);
         }
 
         private OsVersionDto MapOSVersion(OperatingSystemVersion request)
@@ -102,7 +102,7 @@ namespace DeviceManagementWeb.Services
             {
                 Id = request.Id,
                 Name = request.Name,
-                OS = _context.OperatingSystems.Find(request.IdOs),
+                OS = _osRepository.GetById(request.IdOs),
             };
 
             return osv;

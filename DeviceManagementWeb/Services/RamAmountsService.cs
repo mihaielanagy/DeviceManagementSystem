@@ -1,17 +1,18 @@
-﻿using DeviceManagementWeb.Services.Interfaces;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.Services.Interfaces;
 
 namespace DeviceManagementWeb.Services
 {
-    public class RamAmountsService : IRamAmountsService
+    public class RamAmountsService : IDataService<Ramamount>
     {
-        private readonly DeviceManagementContext _context;
-        public RamAmountsService(DeviceManagementContext context)
+        private readonly IBaseRepository<Ramamount> _repository;
+        public RamAmountsService(IBaseRepository<Ramamount> repository)
         {
-            _context = context;
+            _repository = repository;
         }
         public List<Ramamount> GetAll()
         {
-            return _context.Ramamounts.ToList();
+            return _repository.GetAll();
         }
 
         public Ramamount GetById(int id)
@@ -19,7 +20,7 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            return _context.Ramamounts.FirstOrDefault(i => i.Id == id);
+            return _repository.GetById(id);
         }
 
         public int Insert(Ramamount request)
@@ -29,12 +30,12 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var existing = _context.Ramamounts.FirstOrDefault(x => x.Amount == request.Amount);
-            if (existing != null)
-                return 0;
+            //var existing = _context.Ramamounts.FirstOrDefault(x => x.Amount == request.Amount);
+            //if (existing != null)
+            //    return 0;
 
-            _context.Ramamounts.Add(request);
-            _context.SaveChanges();
+            _repository.Insert(request);
+
             return request.Id;
         }
 
@@ -45,8 +46,11 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            _context.Ramamounts.Update(request);
-            return _context.SaveChanges();
+            var dbItem = _repository.GetById(request.Id);
+            if (dbItem == null)
+                return 0;
+
+            return _repository.Update(dbItem);
         }
 
         public int Delete(int id)
@@ -56,14 +60,13 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var amount = _context.Ramamounts.Find(id);
+            var amount = _repository.GetById(id);
             if (amount == null)
             {
                 return 0;
             }
 
-            _context.Ramamounts.Remove(amount);
-            return _context.SaveChanges();
+            return _repository.Delete(id);
         }
     }
 }

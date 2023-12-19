@@ -1,20 +1,21 @@
-﻿using DeviceManagementWeb.Services.Interfaces;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.Services.Interfaces;
 using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 namespace DeviceManagementWeb.Services
 {
-    public class OperatingSystemsService : IOperatingSystemsService
+    public class OperatingSystemsService : IDataService<OperatingSystem>
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IBaseRepository<OperatingSystem> _repository;
 
-        public OperatingSystemsService(DeviceManagementContext context)
+        public OperatingSystemsService(IBaseRepository<OperatingSystem> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public List<OperatingSystem> GetAll()
         {
-            return _context.OperatingSystems.ToList();
+            return _repository.GetAll();
         }
 
         public OperatingSystem GetById(int id)
@@ -22,9 +23,8 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            var operatingSystem = _context.OperatingSystems.FirstOrDefault(i => i.Id == id);
 
-            return operatingSystem;
+            return _repository.GetById(id);
         }
 
         public int Insert(OperatingSystem request)
@@ -34,9 +34,7 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            _context.OperatingSystems.Add(request);
-            _context.SaveChanges();
-
+            _repository.Insert(request);
             return request.Id;
         }
 
@@ -47,8 +45,13 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            _context.OperatingSystems.Update(request);
-            return _context.SaveChanges();
+            var dbItem = _repository.GetById(request.Id);
+            if (dbItem == null)
+                return 0;
+
+            dbItem.Name = request.Name;
+
+            return _repository.Update(dbItem);
         }
 
         public int Delete(int id)
@@ -58,13 +61,11 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var OS = _context.OperatingSystems.Find(id);
+            var OS = _repository.GetById(id);
             if (OS == null)
                 return 0;
-
-            _context.OperatingSystems.Remove(OS);
-
-            return _context.SaveChanges();
+                        
+            return _repository.Delete(id);
         }
     }
 }

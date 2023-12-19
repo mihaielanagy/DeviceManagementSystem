@@ -44,9 +44,9 @@ namespace DeviceManagementWeb.Controllers
             if (!EmailIsValid(userInsertDto.Email))
                 return BadRequest("Invalid email");
 
-            var existingUser = _service.GetByEmail(userInsertDto.Email);
-            if (existingUser != null)
-                return BadRequest("User already exists");
+            //var existingUser = _service.GetByEmail(userInsertDto.Email);
+            //if (existingUser != null)
+            //    return BadRequest("User already exists");
 
             if (!PasswordIsValid(userInsertDto.Password))
                 return BadRequest("Password too short. Must contain at least 8 characters");

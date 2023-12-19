@@ -1,16 +1,17 @@
-﻿using DeviceManagementWeb.Services.Interfaces;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.Services.Interfaces;
 namespace DeviceManagementWeb.Services
 {
-    public class ProcessorsService: IProcessorsService
+    public class ProcessorsService : IDataService<Processor>
     {
-        DeviceManagementContext _context;
-        public ProcessorsService(DeviceManagementContext context)
+        private readonly IBaseRepository<Processor> _repository;
+        public ProcessorsService(IBaseRepository<Processor> repository)
         {
-            _context = context;
+            _repository = repository;
         }
         public List<Processor> GetAll()
         {
-            return _context.Processors.ToList();
+            return _repository.GetAll();
         }
 
         public Processor GetById(int id)
@@ -18,7 +19,7 @@ namespace DeviceManagementWeb.Services
             if (id <= 0)
                 return null;
 
-            return _context.Processors.FirstOrDefault(i => i.Id == id);
+            return _repository.GetById(id);
         }
 
         public int Insert(Processor request)
@@ -28,12 +29,12 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var existingProcessor = _context.Processors.FirstOrDefault(x => x.Name == request.Name);
-            if (existingProcessor != null)
-                return 0;
+            //var existingProcessor = _context.Processors.FirstOrDefault(x => x.Name == request.Name);
+            //if (existingProcessor != null)
+            //    return 0;
 
-            _context.Processors.Add(request);
-            _context.SaveChanges();
+            _repository.Insert(request);
+
             return request.Id;
         }
 
@@ -44,8 +45,13 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            _context.Processors.Update(request);
-            return _context.SaveChanges();
+            var dbItem = _repository.GetById(request.Id);
+            if (dbItem == null)
+                return 0;
+
+            dbItem.Name = request.Name;
+
+            return _repository.Update(dbItem);
         }
 
         public int Delete(int id)
@@ -55,14 +61,13 @@ namespace DeviceManagementWeb.Services
                 return 0;
             }
 
-            var processor = _context.Processors.Find(id);
+            var processor = _repository.GetById(id);
             if (processor == null)
             {
                 return 0;
             }
 
-            _context.Processors.Remove(processor);
-            return _context.SaveChanges();
+            return _repository.Delete(id);
         }
     }
 }

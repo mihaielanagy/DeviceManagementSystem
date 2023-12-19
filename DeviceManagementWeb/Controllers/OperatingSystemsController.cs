@@ -8,9 +8,9 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class OperatingSystemsController : ControllerBase
     {
-        private readonly IOperatingSystemsService _service;
+        private readonly IDataService<OperatingSystem> _service;
 
-        public OperatingSystemsController(IOperatingSystemsService service)
+        public OperatingSystemsController(IDataService<OperatingSystem> service)
         {
             _service = service;
         }
