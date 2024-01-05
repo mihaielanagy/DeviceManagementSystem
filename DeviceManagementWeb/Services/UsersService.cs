@@ -7,19 +7,15 @@ namespace DeviceManagementWeb.Services
     public class UsersService : IUsersService
     {
         private readonly IBaseRepository<User> _userRepository;
-        private readonly IBaseRepository<Location> _locationRepository;
-        private readonly IBaseRepository<City> _cityRepository;
-        private readonly IBaseRepository<Country> _countryRepository;
-        private readonly IBaseRepository<Role> _roleRepository;
+        private readonly IDataService<LocationDto> _locationService;
+        private readonly IDataService<Role> _roleService;
 
-        public UsersService(IBaseRepository<User> userRepository, IBaseRepository<Country> countryRepository, 
-            IBaseRepository<City> cityRepository, IBaseRepository<Location> locationRepository, IBaseRepository<Role> roleRepository)
+        public UsersService(IBaseRepository<User> userRepository, IDataService<LocationDto> locationService,
+            IDataService<Role> roleService)
         {
             _userRepository = userRepository;
-            _countryRepository = countryRepository;
-            _cityRepository = cityRepository;
-            _locationRepository = locationRepository;
-            _roleRepository = roleRepository;
+            _locationService = locationService;
+            _roleService = roleService;
         }
 
         public List<UserDto> GetAll()
@@ -39,7 +35,7 @@ namespace DeviceManagementWeb.Services
         public UserDto GetById(int id)
         {
             if (id < 1)
-               return null;
+                return null;
 
             var user = _userRepository.GetById(id);
             if (user == null)
@@ -67,9 +63,9 @@ namespace DeviceManagementWeb.Services
                 return 0;
 
             //var existingUser = _context.Users.FirstOrDefault(u => u.Email == userInsertDto.Email);
-           // if (existingUser != null)
-                //return 0;
-            
+            // if (existingUser != null)
+            //return 0;
+
 
             if (!PasswordIsValid(userInsertDto.Password))
                 return 0;
@@ -103,7 +99,7 @@ namespace DeviceManagementWeb.Services
             user.Email = request.Email;
             user.IdRole = request.IdRole;
             user.IdLocation = request.IdLocation;
-            
+
             int affectedRows = _userRepository.Update(user);
             return affectedRows;
         }
@@ -117,7 +113,7 @@ namespace DeviceManagementWeb.Services
             if (user == null)
                 return 0;
 
-            int affectedRows = _userRepository.Delete(id);            
+            int affectedRows = _userRepository.Delete(id);
 
             return affectedRows;
         }
@@ -127,18 +123,14 @@ namespace DeviceManagementWeb.Services
 
         private UserDto MapUser(User request)
         {
-            Location loc = _locationRepository.GetById(request.IdLocation);
-            City city = _cityRepository.GetById(loc.IdCity);
-            Country country = _countryRepository.GetById(city.IdCountry);
-
             var userDto = new UserDto
             {
                 Id = request.Id,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
-                Role = _roleRepository.GetById(request.IdRole),
-                Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = loc.IdCity, Name = city.Name, Country = country } }
+                Role = _roleService.GetById(request.IdRole),
+                Location = _locationService.GetById(request.IdLocation)
             };
 
             return userDto;

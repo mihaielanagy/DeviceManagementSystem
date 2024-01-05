@@ -1,4 +1,5 @@
-﻿using DeviceManagementWeb.DTOs;
+﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 using System.Security.Claims;
 using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
@@ -7,16 +8,32 @@ namespace DeviceManagementWeb.Services
 {
     public class DevicesService : IDevicesService
     {
-        private readonly DeviceManagementContext _context;
+        private readonly IBaseRepository<Device> _deviceRepository;
+        private readonly IUsersService _userService;
+        private readonly IDataService<DeviceType> _deviceTypeService;
+        private readonly IDataService<Manufacturer> _manufacturerService;
+        private readonly IDataService<OsVersionDto> _osVersionService;
+        private readonly IDataService<Ramamount> _ramService;
+        private readonly IDataService<Processor> _processorService;
 
-        public DevicesService(DeviceManagementContext context)
+
+        public DevicesService(IBaseRepository<Device> deviceRepository, IUsersService userService,
+            IDataService<Processor> processorService, IDataService<Ramamount> ramService,
+            IDataService<OsVersionDto> osVersionService, IDataService<Manufacturer> manufacturerService,
+            IDataService<DeviceType> deviceTypeService)
         {
-            _context = context;
+            _deviceRepository = deviceRepository;
+            _userService = userService;
+            _processorService = processorService;
+            _ramService = ramService;
+            _osVersionService = osVersionService;
+            _manufacturerService = manufacturerService;
+            _deviceTypeService = deviceTypeService;
         }
 
         public List<DeviceDto> GetAll()
         {
-            var devices = _context.Devices.ToList();
+            var devices = _deviceRepository.GetAll();
             var devicesDto = new List<DeviceDto>();
 
             foreach (var device in devices)
@@ -30,7 +47,7 @@ namespace DeviceManagementWeb.Services
 
         public DeviceDto GetById(int id)
         {
-            var device = _context.Devices.Find(id);
+            var device = _deviceRepository.GetById(id);
             if (device == null)
                 return null;
 
@@ -56,8 +73,7 @@ namespace DeviceManagementWeb.Services
                 IdRamamount = request.IdRamAmount,
             };
 
-            _context.Devices.Add(device);
-            _context.SaveChanges();
+            _deviceRepository.Insert(device);
 
             return device.Id;
         }
@@ -67,7 +83,7 @@ namespace DeviceManagementWeb.Services
             if (request == null || request.Id < 1)
                 return 0;
 
-            var device = _context.Devices.Find(request.Id);
+            var device = _deviceRepository.GetById(request.Id);
             if (device == null)
                 return 0;
 
@@ -79,69 +95,51 @@ namespace DeviceManagementWeb.Services
             device.IdRamamount = request.IdRamAmount;
             device.IdCurrentUser = request.IdUser;
 
-            _context.Devices.Update(device);
+            int affectedRows = _deviceRepository.Update(device);
 
-            return _context.SaveChanges(); ;
+            return affectedRows;
         }
         public int Delete(int id)
         {
             if (id < 1)
                 return 0;
 
-            var device = _context.Devices.Find(id);
+            var device = _deviceRepository.GetById(id);
             if (device == null)
                 return 0;
 
-            _context.Devices.Remove(device);   
-            
-
-            return _context.SaveChanges();
+            int affectedRows = _deviceRepository.Delete(id);
+            return affectedRows;
         }
 
         public int UpdateDeviceUser(int deviceId, int? userId)
         {
-            var device = _context.Devices.Find(deviceId);
+            var device = _deviceRepository.GetById(deviceId);
             device.IdCurrentUser = userId;
-            _context.Devices.Update(device);
+            int affectedRows = _deviceRepository.Update(device);
 
-            return _context.SaveChanges();
+            return affectedRows;
         }
 
         private DeviceDto MapDevice(Device device)
         {
-            User user = null;
-            Location loc = null;
-            City city = null;
-            Country country = null;
+            UserDto user = null;
+
             if (device.IdCurrentUser != null)
             {
-                user = _context.Users.Find(device.IdCurrentUser);
-                loc = _context.Locations.Find(user.IdLocation);
-                city = _context.Cities.Find(loc.IdCity);
-                country = _context.Countries.Find(city.IdCountry);
+                user = _userService.GetById(device.IdCurrentUser ?? 0);
             }
-            OperatingSystemVersion osv = _context.OperatingSystemVersions.Find(device.IdOsversion);
-            OperatingSystem os = _context.OperatingSystems.Find(osv.IdOs);
-
 
             var deviceDto = new DeviceDto
             {
                 Id = device.Id,
                 Name = device.Name,
-                DeviceType = _context.DeviceTypes.Find(device.IdDeviceType),
-                Manufacturer = _context.Manufacturers.Find(device.IdManufacturer),
-                OsVersion = new OsVersionDto { Id = osv.Id, Name = osv.Name, OS = os },
-                Processor = _context.Processors.Find(device.IdProcessor),
-                RamAmount = _context.Ramamounts.Find(device.IdRamamount),
-                User = user != null ? new UserDto
-                {
-                    Email = user.Email,
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Role = _context.Roles.Find(user.IdRole),
-                    Location = new LocationDto { Id = loc.Id, Address = loc.Address, City = new CityDto { Id = city.Id, Country = country } },
-                } : null
+                DeviceType = _deviceTypeService.GetById(device.IdDeviceType),
+                Manufacturer = _manufacturerService.GetById(device.IdManufacturer),
+                OsVersion = _osVersionService.GetById(device.IdOsversion),
+                Processor = _processorService.GetById(device.IdProcessor),
+                RamAmount = _ramService.GetById(device.IdRamamount),
+                User = user
             };
             return deviceDto;
         }

@@ -8,12 +8,12 @@ namespace DeviceManagementWeb.Services
     public class CitiesService :IDataService<CityDto>
     {
         private readonly IBaseRepository<City> _repository;
-        private readonly IBaseRepository<Country> _countryRepository;
+        private readonly IDataService<Country> _countryService;
 
-        public CitiesService(IBaseRepository<City> repository, IBaseRepository<Country> countryRepository)
+        public CitiesService(IBaseRepository<City> repository, IDataService<Country> countryService)
         {
             _repository = repository;
-            _countryRepository = countryRepository;
+            _countryService = countryService;
         }
 
         public List<CityDto> GetAll()
@@ -110,7 +110,7 @@ namespace DeviceManagementWeb.Services
             {
                 Id = city.Id,
                 Name = city.Name,
-                Country = _countryRepository.GetById(city.IdCountry)
+                Country = _countryService.GetById(city.IdCountry)
             };
 
             return cityDto;

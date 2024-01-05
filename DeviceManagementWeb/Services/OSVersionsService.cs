@@ -8,26 +8,26 @@ namespace DeviceManagementWeb.Services
     public class OSVersionsService : IDataService<OsVersionDto>
     {
         private readonly IBaseRepository<OperatingSystemVersion> _repository;
-        private readonly IBaseRepository<OperatingSystem> _osRepository;
+        private readonly IDataService<OperatingSystem> _osService;
 
-        public OSVersionsService(IBaseRepository<OperatingSystemVersion> repository, IBaseRepository<OperatingSystem> osRepository)
+        public OSVersionsService(IBaseRepository<OperatingSystemVersion> repository, IDataService<OperatingSystem> osService)
         {
             _repository = repository;
-            _osRepository = osRepository;
+            _osService = osService;
         }
 
         public List<OsVersionDto> GetAll()
         {
-            var OSVList = new List<OsVersionDto>();
+            var osvList = new List<OsVersionDto>();
             var dbList = _repository.GetAll();
 
             foreach (var OSV in dbList)
             {
-                OSVList.Add(MapOSVersion(OSV));
+                osvList.Add(MapOSVersion(OSV));
             }
 
 
-            return OSVList;
+            return osvList;
         }
 
         public OsVersionDto GetById(int id)
@@ -102,7 +102,7 @@ namespace DeviceManagementWeb.Services
             {
                 Id = request.Id,
                 Name = request.Name,
-                OS = _osRepository.GetById(request.IdOs),
+                OS = _osService.GetById(request.IdOs),
             };
 
             return osv;

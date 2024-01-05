@@ -8,14 +8,13 @@ namespace DeviceManagementWeb.Services
     public class LocationsService : IDataService<LocationDto>
     {
         private readonly IBaseRepository<Location> _locationRepository;
-        private readonly IBaseRepository<City> _cityRepository;
-        private readonly IBaseRepository<Country> _countryRepository;
+        private readonly IDataService<CityDto> _cityService;
 
-        public LocationsService(IBaseRepository<Location> locationRepository, IBaseRepository<City> cityRepository, IBaseRepository<Country> countryRepository)
+
+        public LocationsService(IBaseRepository<Location> locationRepository, IDataService<CityDto> cityService)
         {
             _locationRepository = locationRepository;
-            _cityRepository = cityRepository;
-            _countryRepository = countryRepository;
+            _cityService = cityService;
         }
 
         public List<LocationDto> GetAll()
@@ -54,7 +53,7 @@ namespace DeviceManagementWeb.Services
             if (request.City == null)
             {
                 return 0;
-            }                 
+            }
 
             var location = new Location
             {
@@ -105,14 +104,12 @@ namespace DeviceManagementWeb.Services
 
         private LocationDto MapLocation(Location request)
         {
-            City city = _cityRepository.GetById(request.IdCity);
-            Country country = _countryRepository.GetById(city.IdCountry);
 
             var locationDto = new LocationDto
             {
                 Id = request.Id,
                 Address = request.Address,
-                City = new CityDto { Id = city.Id, Name = city.Name, Country = country }
+                City = _cityService.GetById(request.IdCity)
             };
 
             return locationDto;

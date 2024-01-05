@@ -37,6 +37,7 @@ builder.Services.AddTransient<IBaseRepository<Role>, BaseRepository<Role>>();
 builder.Services.AddTransient<IBaseRepository<OperatingSystemVersion>, BaseRepository<OperatingSystemVersion>>();
 builder.Services.AddTransient<IBaseRepository<Location>, BaseRepository<Location>>();
 builder.Services.AddTransient<IBaseRepository<User>, BaseRepository<User>>();
+builder.Services.AddTransient<IBaseRepository<Device>, BaseRepository<Device>>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>
