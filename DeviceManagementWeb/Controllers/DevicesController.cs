@@ -35,8 +35,11 @@ namespace DeviceManagementWeb.Controllers
         {
             if (id <= 0)
                 return BadRequest("Id is invalid.");
+            var device = _devicesService.GetById(id);
+            if(device == null)
+                return NotFound("Device not found");
 
-            return Ok(_devicesService.GetById(id));
+            return Ok(device);
         }
 
 

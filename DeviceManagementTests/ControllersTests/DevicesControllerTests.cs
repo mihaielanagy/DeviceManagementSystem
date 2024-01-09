@@ -1,7 +1,10 @@
 ﻿using DeviceManagementDB.Models;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.Controllers;
 using DeviceManagementWeb.DTOs;
+using DeviceManagementWeb.Services;
 using Microsoft.AspNetCore.Mvc;
+using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 namespace DeviceManagementTests.ControllersTests
 {
@@ -9,15 +12,70 @@ namespace DeviceManagementTests.ControllersTests
 
     {
         private DeviceManagementContext _dbContext;
+        private BaseRepository<User> _userRepository;
+        private BaseRepository<City> _cityRepository;
+        private BaseRepository<Country> _countryRepository;
+        private BaseRepository<Location> _locationRepository;
+        private BaseRepository<Role> _roleRepository;
+        private BaseRepository<Device> _deviceRepository;
+        private BaseRepository<DeviceType> _deviceTypeRepository;
+        private BaseRepository<Manufacturer> _manufacturerRepository;
+        private BaseRepository<OperatingSystem> _osRepository;
+        private BaseRepository<OperatingSystemVersion> _osVersionRepository;
+        private BaseRepository<Processor> _processorRepository;
+        private BaseRepository<Ramamount> _ramRepository;
+
+        private CitiesService _cityService;
+        private CountriesService _countryService;
+        private LocationsService _locationService;
+        private RolesService _roleService;
+        private DevicesService _deviceService;
+        private DeviceTypesService _deviceTypeService;
+        private ManufacturersService _manufacturerService;
+        private OperatingSystemsService _osService;
+        private OSVersionsService _osVersionService;
+        private ProcessorsService _processorService;
+        private RamAmountsService _ramService;
+        private UsersService _userService;
+
         public DevicesControllerTests()
         {
             _dbContext = new DeviceManagementContext();
+
+            _deviceTypeRepository = new BaseRepository<DeviceType>(_dbContext);
+            _manufacturerRepository = new BaseRepository<Manufacturer>(_dbContext);
+            _osRepository = new BaseRepository<OperatingSystem>(_dbContext);
+            _osVersionRepository = new BaseRepository<OperatingSystemVersion>(_dbContext);
+            _processorRepository = new BaseRepository<Processor>(_dbContext);
+            _ramRepository = new BaseRepository<Ramamount>(_dbContext);
+            _cityRepository = new BaseRepository<City>(_dbContext);
+            _countryRepository = new BaseRepository<Country>(_dbContext);
+            _locationRepository = new BaseRepository<Location>(_dbContext);
+            _userRepository = new BaseRepository<User>(_dbContext);
+            _roleRepository = new BaseRepository<Role>(_dbContext);
+            _deviceRepository = new BaseRepository<Device>(_dbContext);
+
+            _deviceTypeService = new DeviceTypesService(_deviceTypeRepository);
+            _manufacturerService = new ManufacturersService(_manufacturerRepository);
+            _osService = new OperatingSystemsService(_osRepository);
+            _osVersionService = new OSVersionsService(_osVersionRepository, _osService);
+            _processorService = new ProcessorsService(_processorRepository);
+            _ramService = new RamAmountsService(_ramRepository);
+            _countryService = new CountriesService(_countryRepository);
+            _cityService = new CitiesService(_cityRepository, _countryService);
+            _locationService = new LocationsService(_locationRepository, _cityService);
+            _roleService = new RolesService(_roleRepository);
+            _userService = new UsersService(_userRepository, _locationService, _roleService);
+            _deviceService = new DevicesService(_deviceRepository, _userService, _processorService, _ramService,
+                _osVersionService, _manufacturerService, _deviceTypeService);
+
+
         }
         [Fact]
         public void DevicesController_GetAll_ReturnsANonEmptyListOfDevices()
         {
             // Arange
-            var controller = new DevicesController(_dbContext);
+            var controller = new DevicesController(_deviceService, _userService);
 
             // Act
             var result = (OkObjectResult)controller.GetAll().Result;
@@ -32,7 +90,7 @@ namespace DeviceManagementTests.ControllersTests
         public void DevicesController_GetById_ReturnsTheCorrectDeviceFromDb()
         {
             // Arange
-            var controller = new DevicesController(_dbContext);
+            var controller = new DevicesController(_deviceService, _userService);
             var dbDevice = _dbContext.Devices.FirstOrDefault();
 
             // Act
@@ -49,7 +107,7 @@ namespace DeviceManagementTests.ControllersTests
         public void DevicesController_Insert_InsertsDeviceInDB_DeviceIsInDb()
         {
             // Arange
-            var controller = new DevicesController(_dbContext);
+            var controller = new DevicesController(_deviceService, _userService);
             var deviceInsertDto = new DeviceInsertDto
             {
                 Name = "New Device",
@@ -84,7 +142,7 @@ namespace DeviceManagementTests.ControllersTests
         public void DevicesController_Update_UpdatesName_FieldIsUpdatedInDb()
         {
             // Arange
-            var controller = new DevicesController(_dbContext);
+            var controller = new DevicesController(_deviceService, _userService);
             var dbDevice = _dbContext.Devices.FirstOrDefault();
             var idDevice = dbDevice.Id;
             var initialName = (string)dbDevice.Name.Clone();
@@ -121,7 +179,7 @@ namespace DeviceManagementTests.ControllersTests
         public void DevicesController_Delete_DeletsDeviceAfterBeingCreated()
         {
             // Arange
-            var controller = new DevicesController(_dbContext);
+            var controller = new DevicesController(_deviceService, _userService);
             var newDevice = new Device
             {
                 Name = "Delete This Device",
@@ -144,10 +202,11 @@ namespace DeviceManagementTests.ControllersTests
         }
 
         [Fact]
+
         public void DevicesController_Insert_NullDevice_ReturnsBadRequest()
         {
             // Arange
-            var controller = new DevicesController(_dbContext);
+            var controller = new DevicesController(_deviceService, _userService);
             DeviceInsertDto deviceInsert = null;
 
             // Act
@@ -161,11 +220,11 @@ namespace DeviceManagementTests.ControllersTests
         public void DevicesController_GetById_InexistentId_ReturnsBadRequest()
         {
             // Arange
-            var controller = new DevicesController(_dbContext);
+            var controller = new DevicesController(_deviceService, _userService);
             int inexistentId = _dbContext.Devices.Max(d => d.Id) + 1;
 
             // Act
-            var resultInsert = (BadRequestObjectResult)controller.GetById(inexistentId).Result;
+            var resultInsert = (NotFoundObjectResult)controller.GetById(inexistentId).Result;
 
             // Assert
             Assert.Equal("Device not found", resultInsert.Value);

@@ -1,6 +1,8 @@
 ﻿using DeviceManagementDB.Models;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.Controllers;
 using DeviceManagementWeb.DTOs;
+using DeviceManagementWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeviceManagementTests.ControllersTests
@@ -8,16 +10,38 @@ namespace DeviceManagementTests.ControllersTests
     public class UsersControllerTests
     {
         private DeviceManagementContext _dbContext;
+        private BaseRepository<User> _userRepository;
+        private BaseRepository<City> _cityRepository;
+        private BaseRepository<Country> _countryRepository;
+        private BaseRepository<Location> _locationRepository;
+        private BaseRepository<Role> _roleRepository;
+        private CitiesService _cityService;
+        private CountriesService _countryService;
+        private LocationsService _locationService;
+        private RolesService _roleService;
+        private UsersService _userService;
+
         public UsersControllerTests()
         {
             _dbContext = new DeviceManagementContext();
+            _cityRepository = new BaseRepository<City>(_dbContext);
+            _countryRepository = new BaseRepository<Country>(_dbContext);
+            _locationRepository = new BaseRepository<Location>(_dbContext);
+            _countryService = new CountriesService(_countryRepository);
+            _cityService = new CitiesService(_cityRepository, _countryService);
+            _locationService = new LocationsService(_locationRepository, _cityService);
+            _userRepository = new BaseRepository<User>(_dbContext);
+            _roleRepository = new BaseRepository<Role>(_dbContext);
+            _roleService = new RolesService(_roleRepository);
+            _userService = new UsersService(_userRepository, _locationService, _roleService);
         }
+
 
         [Fact]
         public void UsersController_GetAll_ReturnsANonEmptyListOfUsers()
         {
             // Arange
-            var controller = new UsersController(_dbContext);
+            var controller = new UsersController(_userService);
 
             // Act
             var result = (OkObjectResult)controller.GetAll().Result;
@@ -32,7 +56,7 @@ namespace DeviceManagementTests.ControllersTests
         public void UsersController_GetById_ReturnsTheCorrectUserFromDb()
         {
             // Arange
-            var controller = new UsersController(_dbContext);
+            var controller = new UsersController(_userService);
 
             // Act
             var result = (OkObjectResult)controller.GetById(1).Result;
@@ -46,7 +70,7 @@ namespace DeviceManagementTests.ControllersTests
         public void UsersController_Insert_InsertsUserInDB_UserIsInDb()
         {
             // Arange
-            var controller = new UsersController(_dbContext);
+            var controller = new UsersController(_userService);
             var userInsert = new UserInsertDto
             {
                 FirstName = "New",
@@ -79,7 +103,7 @@ namespace DeviceManagementTests.ControllersTests
         public void UsersController_Update_UpdatesLastName_FieldIsUpdatedInDb()
         {
             // Arange
-            var controller = new UsersController(_dbContext);
+            var controller = new UsersController(_userService);
             var dbUser = _dbContext.Users.Find(1);
             var initialLastName = (string)dbUser.LastName.Clone();
             var userInsertDto = new UserInsertDto
@@ -114,7 +138,7 @@ namespace DeviceManagementTests.ControllersTests
         public void UsersController_Delete_DeletsUserAfterBeingCreated()
         {
             // Arange
-            var controller = new UsersController(_dbContext);
+            var controller = new UsersController(_userService);
             var newUser = new User
             {
                 FirstName = "Delete",
@@ -139,7 +163,7 @@ namespace DeviceManagementTests.ControllersTests
         public void UsersController_Insert_InvalidEmailAddress_ReturnsBadRequest()
         {
             // Arange
-            var controller = new UsersController(_dbContext);
+            var controller = new UsersController(_userService);
             var userInsert = new UserInsertDto
             {
                 FirstName = "New",
@@ -161,7 +185,7 @@ namespace DeviceManagementTests.ControllersTests
         public void UsersController_Insert_InvalidPassword_ReturnsBadRequest()
         {
             // Arange
-            var controller = new UsersController(_dbContext);
+            var controller = new UsersController(_userService);
             var userInsert = new UserInsertDto
             {
                 FirstName = "New",
@@ -180,4 +204,5 @@ namespace DeviceManagementTests.ControllersTests
         }
     }
 }
+
 
