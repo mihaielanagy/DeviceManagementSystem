@@ -1,44 +1,14 @@
 global using DeviceManagementDB.Models;
-using DeviceManagementDB.Repositories;
-using DeviceManagementWeb.DTOs;
-using DeviceManagementWeb.Services;
-using DeviceManagementWeb.Services.Interfaces;
+using DeviceManagementWeb;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Net.Http;
 using System.Text;
-using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSingleton<ILoggingService, LoggingService>();
+builder.Services.RegisterServices();
+builder.Services.RegisterRepositories();
 
-builder.Services.AddTransient<IUsersService, UsersService>();
-builder.Services.AddTransient<IDevicesService, DevicesService>();
-
-builder.Services.AddTransient<IDataService<CityDto>, CitiesService>();
-builder.Services.AddTransient<IDataService<Country>, CountriesService>();
-builder.Services.AddTransient<IDataService<DeviceType>, DeviceTypesService>();
-builder.Services.AddTransient<IDataService<Manufacturer>, ManufacturersService>();
-builder.Services.AddTransient<IDataService<OperatingSystem>, OperatingSystemsService>();
-builder.Services.AddTransient<IDataService<Processor>, ProcessorsService>();
-builder.Services.AddTransient<IDataService<Ramamount>, RamAmountsService>();
-builder.Services.AddTransient<IDataService<Role>, RolesService>();
-builder.Services.AddTransient<IDataService<OsVersionDto>, OSVersionsService>();
-builder.Services.AddTransient<IDataService<LocationDto>, LocationsService>();
-
-builder.Services.AddTransient<IBaseRepository<City>, BaseRepository<City>>();
-builder.Services.AddTransient<IBaseRepository<Country>, BaseRepository<Country>>();
-builder.Services.AddTransient<IBaseRepository<DeviceType>, BaseRepository<DeviceType>>();
-builder.Services.AddTransient<IBaseRepository<Manufacturer>, BaseRepository<Manufacturer>>();
-builder.Services.AddTransient<IBaseRepository<OperatingSystem>, BaseRepository<OperatingSystem>>();
-builder.Services.AddTransient<IBaseRepository<Processor>, BaseRepository<Processor>>();
-builder.Services.AddTransient<IBaseRepository<Ramamount>, BaseRepository<Ramamount>>();
-builder.Services.AddTransient<IBaseRepository<Role>, BaseRepository<Role>>();
-builder.Services.AddTransient<IBaseRepository<OperatingSystemVersion>, BaseRepository<OperatingSystemVersion>>();
-builder.Services.AddTransient<IBaseRepository<Location>, BaseRepository<Location>>();
-builder.Services.AddTransient<IBaseRepository<User>, BaseRepository<User>>();
-builder.Services.AddTransient<IBaseRepository<Device>, BaseRepository<Device>>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>
