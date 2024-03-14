@@ -16,12 +16,22 @@ namespace DeviceManagementWeb.Controllers
             _service = service;
         }
 
+        /// <summary>
+        ///  Get a list of all cities in the database
+        /// </summary>
+
+
         [HttpGet]
         public ActionResult<List<CityDto>> GetAll()
         {
             return Ok(_service.GetAll());
         }
-
+        /// <summary>
+        ///  Get one city from the database
+        /// </summary>
+        /// <response code="200">Returns city</response>
+        /// <response code="404">City ID not found in the database</response>
+        /// <response code="400">City ID is invalid</response>
         [HttpGet("{id}")]
         public ActionResult<CityDto> GetById(int id)
         {
