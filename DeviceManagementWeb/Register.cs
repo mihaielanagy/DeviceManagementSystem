@@ -1,4 +1,5 @@
-﻿using DeviceManagementDB.Repositories;
+﻿using AutoMapper;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services;
 using DeviceManagementWeb.Services.Interfaces;

@@ -33,7 +33,7 @@ namespace DeviceManagementTests.ControllersTests
             _userRepository = new BaseRepository<User>(_dbContext);
             _roleRepository = new BaseRepository<Role>(_dbContext);
             _roleService = new RolesService(_roleRepository);
-            _userService = new UsersService(_userRepository, _locationService, _roleService);
+            //_userService = new UsersService(_userRepository, _locationService, _roleService);
         }
 
 

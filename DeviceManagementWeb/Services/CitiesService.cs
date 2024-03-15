@@ -1,19 +1,20 @@
-﻿using DeviceManagementDB.Repositories;
+﻿using AutoMapper;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 using System.Data.Entity.Core;
 
 namespace DeviceManagementWeb.Services
 {
-    public class CitiesService :IDataService<CityDto>
+    public class CitiesService : IDataService<CityDto>
     {
         private readonly IBaseRepository<City> _repository;
-        private readonly IDataService<Country> _countryService;
+        private readonly IMapper _mapper;
 
-        public CitiesService(IBaseRepository<City> repository, IDataService<Country> countryService)
+        public CitiesService(IBaseRepository<City> repository, IMapper mapper)
         {
             _repository = repository;
-            _countryService = countryService;
+            _mapper = mapper;
         }
 
         public List<CityDto> GetAll()
@@ -22,7 +23,7 @@ namespace DeviceManagementWeb.Services
             var citiesDto = new List<CityDto>();
             foreach (var city in cities)
             {
-                CityDto cityDto = MapCity(city);
+                CityDto cityDto = _mapper.Map<CityDto>(city);
                 citiesDto.Add(cityDto);
             }
             return citiesDto;
@@ -35,7 +36,7 @@ namespace DeviceManagementWeb.Services
 
             var city = _repository.GetById(id);
 
-            CityDto cityDto = MapCity(city);
+            CityDto cityDto = _mapper.Map<CityDto>(city);
 
             return cityDto;
         }
@@ -100,20 +101,20 @@ namespace DeviceManagementWeb.Services
             var city = _repository.GetById(id);
             if (city == null)
                 throw new ObjectNotFoundException("City id not found in the database.");
-                        
+
             return _repository.Delete(city.Id);
         }
 
-        public CityDto MapCity(City city)
-        {
-            var cityDto = new CityDto
-            {
-                Id = city.Id,
-                Name = city.Name,
-                Country = _countryService.GetById(city.IdCountry)
-            };
+        //public CityDto MapCity(City city)
+        //{
+        //    var cityDto = new CityDto
+        //    {
+        //        Id = city.Id,
+        //        Name = city.Name,
+        //        Country = _countryService.GetById(city.IdCountry)
+        //    };
 
-            return cityDto;
-        }
+        //    return cityDto;
+        //}
     }
 }

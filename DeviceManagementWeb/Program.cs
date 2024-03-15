@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Reflection;
+using DeviceManagementWeb.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.RegisterServices();
@@ -75,6 +76,8 @@ builder.Services.AddCors(options => options.AddPolicy(name: "DeviceOrigins",
         policy.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader();
     }));
 builder.Services.AddDbContext<DeviceManagementContext>();
+//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 var app = builder.Build();
 

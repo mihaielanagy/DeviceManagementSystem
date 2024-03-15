@@ -65,7 +65,7 @@ namespace DeviceManagementTests.ControllersTests
             _cityService = new CitiesService(_cityRepository, _countryService);
             _locationService = new LocationsService(_locationRepository, _cityService);
             _roleService = new RolesService(_roleRepository);
-            _userService = new UsersService(_userRepository, _locationService, _roleService);
+            //_userService = new UsersService(_userRepository, _locationService, _roleService);
             _deviceService = new DevicesService(_deviceRepository, _userService, _processorService, _ramService,
                 _osVersionService, _manufacturerService, _deviceTypeService);
 

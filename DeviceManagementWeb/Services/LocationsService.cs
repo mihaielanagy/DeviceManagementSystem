@@ -1,4 +1,5 @@
-﻿using DeviceManagementDB.Repositories;
+﻿using AutoMapper;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 using System.Data.Entity.Core;
@@ -8,13 +9,13 @@ namespace DeviceManagementWeb.Services
     public class LocationsService : IDataService<LocationDto>
     {
         private readonly IBaseRepository<Location> _locationRepository;
-        private readonly IDataService<CityDto> _cityService;
+        private readonly IMapper _mapper;
 
 
-        public LocationsService(IBaseRepository<Location> locationRepository, IDataService<CityDto> cityService)
+        public LocationsService(IBaseRepository<Location> locationRepository, IMapper mapper)
         {
             _locationRepository = locationRepository;
-            _cityService = cityService;
+            _mapper = mapper;
         }
 
         public List<LocationDto> GetAll()
@@ -24,7 +25,7 @@ namespace DeviceManagementWeb.Services
 
             foreach (var location in locations)
             {
-                locationsDto.Add(MapLocation(location));
+                locationsDto.Add(_mapper.Map<LocationDto>(location));
             }
 
             return locationsDto;
@@ -40,7 +41,7 @@ namespace DeviceManagementWeb.Services
             if (location == null)
                 return null;
 
-            return MapLocation(location);
+            return _mapper.Map<LocationDto>(location);
         }
 
         public int Insert(LocationDto request)
@@ -102,17 +103,17 @@ namespace DeviceManagementWeb.Services
             return affectedRows;
         }
 
-        private LocationDto MapLocation(Location request)
-        {
+        //private LocationDto MapLocation(Location request)
+        //{
 
-            var locationDto = new LocationDto
-            {
-                Id = request.Id,
-                Address = request.Address,
-                City = _cityService.GetById(request.IdCity)
-            };
+        //    var locationDto = new LocationDto
+        //    {
+        //        Id = request.Id,
+        //        Address = request.Address,
+        //        City = _cityService.GetById(request.IdCity)
+        //    };
 
-            return locationDto;
-        }
+        //    return locationDto;
+        //}
     }
 }

@@ -1,4 +1,5 @@
-﻿using DeviceManagementDB.Repositories;
+﻿using AutoMapper;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 
@@ -9,13 +10,15 @@ namespace DeviceManagementWeb.Services
         private readonly IBaseRepository<User> _userRepository;
         private readonly IDataService<LocationDto> _locationService;
         private readonly IDataService<Role> _roleService;
+        public readonly IMapper _mapper;
 
         public UsersService(IBaseRepository<User> userRepository, IDataService<LocationDto> locationService,
-            IDataService<Role> roleService)
+            IDataService<Role> roleService, IMapper mapper)
         {
             _userRepository = userRepository;
             _locationService = locationService;
             _roleService = roleService;
+            _mapper = mapper;
         }
 
         public List<UserDto> GetAll()
@@ -25,7 +28,8 @@ namespace DeviceManagementWeb.Services
 
             foreach (var user in users)
             {
-                var userDto = MapUser(user);
+                //var userDto = MapUser(user);
+                var userDto = _mapper.Map<UserDto>(user);
                 usersDto.Add(userDto);
             }
 
@@ -41,9 +45,10 @@ namespace DeviceManagementWeb.Services
             if (user == null)
                 return null;
 
-            var userDto = MapUser(user);
-
-            return userDto;
+            //var userDto = MapUser(user);
+            var userDto = _mapper.Map<UserDto> (user);
+           
+                return userDto;
         }
 
         //public UserDto GetByEmail(string email)
@@ -121,19 +126,19 @@ namespace DeviceManagementWeb.Services
         private bool EmailIsValid(string email) => email.Contains("@") && email.Contains(".");
         private bool PasswordIsValid(string password) => password.Length >= 8;
 
-        private UserDto MapUser(User request)
-        {
-            var userDto = new UserDto
-            {
-                Id = request.Id,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                Role = _roleService.GetById(request.IdRole),
-                Location = _locationService.GetById(request.IdLocation)
-            };
+        //private UserDto MapUser(User request)
+        //{
+        //    var userDto = new UserDto
+        //    {
+        //        Id = request.Id,
+        //        FirstName = request.FirstName,
+        //        LastName = request.LastName,
+        //        Email = request.Email,
+        //        Role = _roleService.GetById(request.IdRole),
+        //        Location = _locationService.GetById(request.IdLocation)
+        //    };
 
-            return userDto;
-        }
+        //    return userDto;
+        //}
     }
 }
