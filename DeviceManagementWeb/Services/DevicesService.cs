@@ -1,4 +1,5 @@
-﻿using DeviceManagementDB.Repositories;
+﻿using AutoMapper;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 using System.Security.Claims;
@@ -9,26 +10,13 @@ namespace DeviceManagementWeb.Services
     public class DevicesService : IDevicesService
     {
         private readonly IBaseRepository<Device> _deviceRepository;
-        private readonly IUsersService _userService;
-        private readonly IDataService<DeviceType> _deviceTypeService;
-        private readonly IDataService<Manufacturer> _manufacturerService;
-        private readonly IDataService<OsVersionDto> _osVersionService;
-        private readonly IDataService<Ramamount> _ramService;
-        private readonly IDataService<Processor> _processorService;
+        private readonly IMapper _mapper;
 
 
-        public DevicesService(IBaseRepository<Device> deviceRepository, IUsersService userService,
-            IDataService<Processor> processorService, IDataService<Ramamount> ramService,
-            IDataService<OsVersionDto> osVersionService, IDataService<Manufacturer> manufacturerService,
-            IDataService<DeviceType> deviceTypeService)
+        public DevicesService(IBaseRepository<Device> deviceRepository, IMapper mapper)
         {
             _deviceRepository = deviceRepository;
-            _userService = userService;
-            _processorService = processorService;
-            _ramService = ramService;
-            _osVersionService = osVersionService;
-            _manufacturerService = manufacturerService;
-            _deviceTypeService = deviceTypeService;
+            _mapper = mapper;
         }
 
         public List<DeviceDto> GetAll()
@@ -38,7 +26,7 @@ namespace DeviceManagementWeb.Services
 
             foreach (var device in devices)
             {
-                DeviceDto deviceDto = MapDevice(device);
+                DeviceDto deviceDto = _mapper.Map<DeviceDto>(device);
                 devicesDto.Add(deviceDto);
             }
 
@@ -51,7 +39,7 @@ namespace DeviceManagementWeb.Services
             if (device == null)
                 return null;
 
-            DeviceDto deviceDto = MapDevice(device);
+            DeviceDto deviceDto = _mapper.Map<DeviceDto>(device);
 
             return deviceDto;
         }
@@ -121,28 +109,28 @@ namespace DeviceManagementWeb.Services
             return affectedRows;
         }
 
-        private DeviceDto MapDevice(Device device)
-        {
-            UserDto user = null;
+        //private DeviceDto MapDevice(Device device)
+        //{
+        //    UserDto user = null;
 
-            if (device.IdCurrentUser != null)
-            {
-                user = _userService.GetById(device.IdCurrentUser ?? 0);
-            }
+        //    if (device.IdCurrentUser != null)
+        //    {
+        //        user = _userService.GetById(device.IdCurrentUser ?? 0);
+        //    }
 
-            var deviceDto = new DeviceDto
-            {
-                Id = device.Id,
-                Name = device.Name,
-                DeviceType = _deviceTypeService.GetById(device.IdDeviceType),
-                Manufacturer = _manufacturerService.GetById(device.IdManufacturer),
-                OsVersion = _osVersionService.GetById(device.IdOsversion),
-                Processor = _processorService.GetById(device.IdProcessor),
-                RamAmount = _ramService.GetById(device.IdRamamount),
-                User = user
-            };
-            return deviceDto;
-        }
+        //    var deviceDto = new DeviceDto
+        //    {
+        //        Id = device.Id,
+        //        Name = device.Name,
+        //        DeviceType = _deviceTypeService.GetById(device.IdDeviceType),
+        //        Manufacturer = _manufacturerService.GetById(device.IdManufacturer),
+        //        OsVersion = _osVersionService.GetById(device.IdOsversion),
+        //        Processor = _processorService.GetById(device.IdProcessor),
+        //        RamAmount = _ramService.GetById(device.IdRamamount),
+        //        User = user
+        //    };
+        //    return deviceDto;
+        //}
     }
 }
 

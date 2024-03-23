@@ -45,10 +45,9 @@ namespace DeviceManagementWeb.Services
             if (user == null)
                 return null;
 
-            //var userDto = MapUser(user);
-            var userDto = _mapper.Map<UserDto> (user);
-           
-                return userDto;
+            var userDto = _mapper.Map<UserDto>(user);
+
+            return userDto;
         }
 
         //public UserDto GetByEmail(string email)

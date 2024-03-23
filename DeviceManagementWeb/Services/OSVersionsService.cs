@@ -1,4 +1,5 @@
-﻿using DeviceManagementDB.Repositories;
+﻿using AutoMapper;
+using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
@@ -8,12 +9,12 @@ namespace DeviceManagementWeb.Services
     public class OSVersionsService : IDataService<OsVersionDto>
     {
         private readonly IBaseRepository<OperatingSystemVersion> _repository;
-        private readonly IDataService<OperatingSystem> _osService;
+        private readonly IMapper _mapper;
 
-        public OSVersionsService(IBaseRepository<OperatingSystemVersion> repository, IDataService<OperatingSystem> osService)
+        public OSVersionsService(IBaseRepository<OperatingSystemVersion> repository, IMapper mapper)
         {
             _repository = repository;
-            _osService = osService;
+            _mapper = mapper;
         }
 
         public List<OsVersionDto> GetAll()
@@ -21,9 +22,9 @@ namespace DeviceManagementWeb.Services
             var osvList = new List<OsVersionDto>();
             var dbList = _repository.GetAll();
 
-            foreach (var OSV in dbList)
+            foreach (var osv in dbList)
             {
-                osvList.Add(MapOSVersion(OSV));
+                osvList.Add(_mapper.Map<OsVersionDto>(osv));
             }
 
 
@@ -37,7 +38,7 @@ namespace DeviceManagementWeb.Services
 
             var operatingSystemVersion = _repository.GetById(id);
 
-            return MapOSVersion(operatingSystemVersion);
+            return _mapper.Map<OsVersionDto>(operatingSystemVersion);
         }
 
         public int Insert(OsVersionDto request)
@@ -96,16 +97,16 @@ namespace DeviceManagementWeb.Services
             return _repository.Delete(id);
         }
 
-        private OsVersionDto MapOSVersion(OperatingSystemVersion request)
-        {
-            var osv = new OsVersionDto
-            {
-                Id = request.Id,
-                Name = request.Name,
-                OS = _osService.GetById(request.IdOs),
-            };
+        //private OsVersionDto MapOSVersion(OperatingSystemVersion request)
+        //{
+        //    var osv = new OsVersionDto
+        //    {
+        //        Id = request.Id,
+        //        Name = request.Name,
+        //        OS = _osService.GetById(request.IdOs),
+        //    };
 
-            return osv;
-        }
+        //    return osv;
+        //}
     }
 }
