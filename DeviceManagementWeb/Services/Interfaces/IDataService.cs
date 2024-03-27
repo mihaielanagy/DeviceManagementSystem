@@ -2,10 +2,10 @@
 {
     public interface IDataService<T> where T : class
     {
-        List<T> GetAll();
-        T GetById(int id);
-        int Insert(T request);
-        int Update(T request);
-        int Delete(int id);
+        ServiceResponse<List<T>> GetAll();
+        ServiceResponse<T> GetById(int id);
+        ServiceResponse<int> Insert(T request);
+        ServiceResponse<int> Update(T request);
+        ServiceResponse<int> Delete(int id);
     }
 }

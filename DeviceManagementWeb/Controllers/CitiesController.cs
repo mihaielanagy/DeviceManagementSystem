@@ -24,26 +24,32 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<CityDto>> GetAll()
         {
-            return Ok(_service.GetAll());
+            var serviceResp = _service.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
+
+
         }
         /// <summary>
         ///  Get one city from the database
         /// </summary>
-        /// <response code="200">Returns city</response>
-        /// <response code="404">City ID not found in the database</response>
-        /// <response code="400">City ID is invalid</response>
+
         [HttpGet("{id}")]
         public ActionResult<CityDto> GetById(int id)
         {
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var city = _service.GetById(id);
+            var serviceResp = _service.GetById(id);
 
-            if (city == null)
-                return NotFound("City not found");
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
 
-            return Ok(city);
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
@@ -59,58 +65,47 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Country cannot be null.");
             }
 
-            var cityId = _service.Insert(request);
-            if (cityId == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(cityId);
+            var serviceResp = _service.Insert(request);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(CityDto request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("City id is invalid.");
-            }
 
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("City name cannot be empty.");
-            }
 
             if (request.Country == null)
-            {
                 return BadRequest("Country cannot be null.");
-            }
 
-            int rowsAffected = _service.Update(request);
-            if (rowsAffected == 0)
-            {
-                return NotFound("City not found.");
-            }
 
-            return Ok(rowsAffected);
+            var serviceResp = _service.Update(request);
 
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
+
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int rowsAffected = _service.Delete(id);
-            if (rowsAffected == 0)
-            {
-                return NotFound("City not found");
-            };
+            var serviceResp = _service.Delete(id);
 
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+
+            return Ok(serviceResp.Data);
         }
     }
 }

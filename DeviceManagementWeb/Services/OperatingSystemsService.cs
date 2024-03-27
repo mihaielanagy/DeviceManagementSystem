@@ -13,59 +13,58 @@ namespace DeviceManagementWeb.Services
             _repository = repository;
         }
 
-        public List<OperatingSystem> GetAll()
+        public ServiceResponse<List<OperatingSystem>> GetAll()
         {
-            return _repository.GetAll();
+            var list = _repository.GetAll();
+            return new ServiceResponse<List<OperatingSystem>>(list, true);
         }
 
-        public OperatingSystem GetById(int id)
+        public ServiceResponse<OperatingSystem> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<OperatingSystem>(null, false, "Invalid id");
 
-
-            return _repository.GetById(id);
+            var os = _repository.GetById(id);
+            return new ServiceResponse<OperatingSystem>(os, true);
         }
 
-        public int Insert(OperatingSystem request)
+        public ServiceResponse<int> Insert(OperatingSystem request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Name cannot be empty");
 
             _repository.Insert(request);
-            return request.Id;
+            return new ServiceResponse<int>(request.Id, true);
         }
 
-        public int Update(OperatingSystem request)
+        public ServiceResponse<int> Update(OperatingSystem request)
         {
-            if (request == null || request.Id == 0)
-            {
-                return 0;
-            }
+            if (request.Id == 0)
+                return new ServiceResponse<int>(0, false, "Invalid id");
+
+            if (request == null)
+                return new ServiceResponse<int>(0, false, "Name cannot be empty");
 
             var dbItem = _repository.GetById(request.Id);
             if (dbItem == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Operating System not found");
 
             dbItem.Name = request.Name;
-
-            return _repository.Update(dbItem);
+            var affectedRows = _repository.Update(dbItem);
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id < 1)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var OS = _repository.GetById(id);
             if (OS == null)
-                return 0;
-                        
-            return _repository.Delete(id);
+                return new ServiceResponse<int>(0, false, "Operating System not found");
+
+            var affectedRows = _repository.Delete(id);
+            return new ServiceResponse<int>(affectedRows, true);
         }
     }
 }

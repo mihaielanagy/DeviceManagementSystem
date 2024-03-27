@@ -11,62 +11,58 @@ namespace DeviceManagementWeb.Services
             _repository = repository;
         }
 
-        public List<Role> GetAll()
+        public ServiceResponse<List<Role>> GetAll()
         {
-            return _repository.GetAll();
+            var list = _repository.GetAll();
+            return new ServiceResponse<List<Role>>(list, true);
         }
 
-        public Role GetById(int id)
+        public ServiceResponse<Role> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<Role>(null, false, "Invalid id");
 
-            return _repository.GetById(id);
+            var item = _repository.GetById(id);
+            return new ServiceResponse<Role>(item, true);
         }
 
-        public int Insert(Role request)
+        public ServiceResponse<int> Insert(Role request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Role name cannot be empty");
 
             //var existingRole = _context.Roles.FirstOrDefault(x => x.Name == request.Name);
             //if (existingRole != null)
             //    return 0;
 
             _repository.Insert(request);
-            return request.Id;
+            return new ServiceResponse<int>(request.Id, true);           
         }
 
-        public int Update(Role request)
+        public ServiceResponse<int> Update(Role request)
         {
-            if (request == null || request.Id <= 0 || string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+            if (request == null || string.IsNullOrEmpty(request.Name))
+                return new ServiceResponse<int>(0, false, "Role name cannot be empty");
 
             var dbItem = _repository.GetById(request.Id);
             if (dbItem == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Id not found");
 
-            return _repository.Update(dbItem);
+            var affectedRows = _repository.Update(dbItem);
+            return new ServiceResponse<int>(affectedRows,true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id <= 0)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var role = _repository.GetById(id);
             if (role == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Id not found");
 
-            return _repository.Delete(id);
+            var affectedRows = _repository.Delete(id);
+            return new ServiceResponse<int>(affectedRows, true);            
         }
     }
 }

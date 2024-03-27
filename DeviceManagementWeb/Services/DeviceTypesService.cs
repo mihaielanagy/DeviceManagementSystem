@@ -11,65 +11,68 @@ namespace DeviceManagementWeb.Services
             _repository = repository;
         }
 
-        public List<DeviceType> GetAll()
+        public ServiceResponse<List<DeviceType>> GetAll()
         {
-            return _repository.GetAll();
+            var types = _repository.GetAll();
+            return new ServiceResponse<List<DeviceType>>(types, true);
         }
 
-        public DeviceType GetById(int id)
+        public ServiceResponse<DeviceType> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<DeviceType>(null, false, "Invalid id");
 
-            return _repository.GetById(id);
+            var type = _repository.GetById(id);
+            return new ServiceResponse<DeviceType>(type, true);
+
         }
 
-        public int Insert(DeviceType request)
+        public ServiceResponse<int> Insert(DeviceType request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Name cannot be empty");
+
 
             var existingDt = _repository.GetById(request.Id);
             if (existingDt != null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "DeviceType already exists");
+
 
             _repository.Insert(request);
-            return request.Id;
+            return new ServiceResponse<int>(request.Id, true);
         }
 
-        public int Update(DeviceType request)
+        public ServiceResponse<int> Update(DeviceType request)
         {
-            if (request == null || request.Id <= 0 || string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+            if (request.Id <= 0)
+                return new ServiceResponse<int>(0, false, "Invalid id");
+
+            if (string.IsNullOrEmpty(request.Name) || request == null)
+                return new ServiceResponse<int>(0, false, "Name cannot be empty");
 
             var dbItem = _repository.GetById(request.Id);
             if (dbItem == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Device Type not found");
 
             dbItem.Name = request.Name;
+            var affectedRows = _repository.Update(dbItem);
 
-            return _repository.Update(dbItem);
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id <= 0)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid Id");
+
 
             var deviceType = _repository.GetById(id);
 
             if (deviceType == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Device Type not found");
 
-            return _repository.Delete(id);
+            var affectedRows = _repository.Delete(id);
+            return new ServiceResponse<int>(affectedRows, true);
         }
     }
 }

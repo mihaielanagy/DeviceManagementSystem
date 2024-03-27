@@ -16,7 +16,7 @@ namespace DeviceManagementWeb.Mapping
 
         public OperatingSystem Resolve(OperatingSystemVersion source, OsVersionDto destination, OperatingSystem destMember, ResolutionContext context)
         {
-            return _service.GetById(source.IdOs);
+            return _service.GetById(source.IdOs).Data;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace DeviceManagementWeb.Mapping
         public LocationDto Resolve(User source, UserDto destination, LocationDto destMember, ResolutionContext context)
         {
             
-            var loc =  _locationService.GetById(source.IdLocation);
+            var loc =  _locationService.GetById(source.IdLocation).Data;
             return _mapper.Map<LocationDto>(loc);
         }
     }

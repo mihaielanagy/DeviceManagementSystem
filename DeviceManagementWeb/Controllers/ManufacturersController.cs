@@ -8,7 +8,7 @@ namespace DeviceManagementWeb.Controllers
     [ApiController]
     public class ManufacturersController : ControllerBase
     {
-        private readonly  IDataService<Manufacturer> _manufacturersService;
+        private readonly IDataService<Manufacturer> _manufacturersService;
 
         public ManufacturersController(IDataService<Manufacturer> manufacturersService)
         {
@@ -18,7 +18,12 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<Manufacturer>> GetAll()
         {
-            return Ok(_manufacturersService.GetAll());
+            var serviceResp = _manufacturersService.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -27,73 +32,57 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var manufacturer = _manufacturersService.GetById(id);
+            var serviceResp = _manufacturersService.GetById(id);
 
-            if (manufacturer == null)
-                return BadRequest("Manufacturer not found");
-
-            return Ok(manufacturer);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(Manufacturer request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Manufacturer name cannot be empty");
-            }
 
-            var id = _manufacturersService.Insert(request);
+            var serviceResp = _manufacturersService.Insert(request);
 
-            if (id == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(Manufacturer request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("Id is invalid.");
-            }
 
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Name cannot be empty.");
-            }
 
-            int rowsAffected = _manufacturersService.Update(request);
+            var serviceResp = _manufacturersService.Update(request);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Manufacturer not found.");
-            }
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int rowsAffected = _manufacturersService.Delete(id);
+            var serviceResp = _manufacturersService.Delete(id);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Manufacturer not found.");
-            };
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
-
-
     }
 }

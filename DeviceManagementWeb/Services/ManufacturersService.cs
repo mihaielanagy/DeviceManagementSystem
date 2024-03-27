@@ -10,65 +10,60 @@ namespace DeviceManagementWeb.Services
         {
             _repository = repository;
         }
-        public List<Manufacturer> GetAll()
+        public ServiceResponse<List<Manufacturer>> GetAll()
         {
-            return _repository.GetAll();
+            var list = _repository.GetAll();
+            return new ServiceResponse<List<Manufacturer>>(list, true);
         }
 
 
-        public Manufacturer GetById(int id)
+        public ServiceResponse<Manufacturer> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<Manufacturer>(null, false, "Invalid Id");
 
-            return _repository.GetById(id);
+            var mnf = _repository.GetById(id);
+            return new ServiceResponse<Manufacturer>(mnf, true);
         }
 
-        public int Insert(Manufacturer request)
+        public ServiceResponse<int> Insert(Manufacturer request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid Id");
 
             //var existingManufacturer = _context.Manufacturers.FirstOrDefault(x => x.Name == request.Name);
             // if (existingManufacturer != null)
             //return 0;
 
             _repository.Insert(request);
-            return request.Id;
+            return new ServiceResponse<int>(request.Id, true);
         }
 
-        public int Update(Manufacturer request)
+        public ServiceResponse<int> Update(Manufacturer request)
         {
             if (request == null || request.Id <= 0 || string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid Id");
 
             Manufacturer manufacturer = _repository.GetById(request.Id);
             if (manufacturer == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Manufacturer not found");
 
             manufacturer.Name = request.Name;
-
-            return _repository.Update(manufacturer);
+            var affectedRows = _repository.Update(manufacturer);
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id <= 0)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid Id");
 
             var manufacturer = _repository.GetById(id);
             if (manufacturer == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Manufacturer not found");
 
-            return _repository.Delete(id);
+            var affectedRows = _repository.Delete(id);
+            return new ServiceResponse<int>(affectedRows, true);
         }
     }
 }

@@ -14,11 +14,16 @@ namespace DeviceManagementWeb.Controllers
             _processorsService = processorsService;
         }
 
-       
+
         [HttpGet]
         public ActionResult<List<Processor>> GetAll()
         {
-            return Ok(_processorsService.GetAll());
+            var serviceResp = _processorsService.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -27,71 +32,57 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var processor = _processorsService.GetById(id);
+            var serviceResp = _processorsService.GetById(id);
 
-            if (processor == null)
-                return BadRequest("Processor not found");
-
-            return Ok(processor);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(Processor request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Processor name cannot be empty");
-            }
 
-            var id = _processorsService.Insert(request);
+            var serviceResp = _processorsService.Insert(request);
 
-            if (id == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(Processor request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("Id is invalid.");
-            }
 
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Name cannot be empty.");
-            }
 
-            int rowsAffected = _processorsService.Update(request);
+            var serviceResp = _processorsService.Update(request);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Processor not found.");
-            }
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int rowsAffected = _processorsService.Delete(id);
+            var serviceResp = _processorsService.Delete(id);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Processor not found.");
-            };
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
     }
 }

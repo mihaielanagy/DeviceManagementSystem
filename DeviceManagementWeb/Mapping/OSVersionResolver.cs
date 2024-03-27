@@ -18,7 +18,7 @@ namespace DeviceManagementWeb.Mapping
         public OsVersionDto Resolve(Device source, DeviceDto destination, OsVersionDto destMember, ResolutionContext context)
         {
 
-            var osv = _service.GetById(source.IdOsversion);
+            var osv = _service.GetById(source.IdOsversion).Data;
             return _mapper.Map<OsVersionDto>(osv);
         }
     }

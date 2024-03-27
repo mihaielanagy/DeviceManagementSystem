@@ -22,7 +22,12 @@ namespace DeviceManagementWeb.Controllers
 
         public ActionResult<List<UserDto>> GetAll()
         {
-            return Ok(_service.GetAll());
+            var serviceResp = _service.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -31,11 +36,11 @@ namespace DeviceManagementWeb.Controllers
             if (id < 1)
                 return BadRequest("Invalid Id");
 
-            var user = _service.GetById(id);
-            if (user == null)
-                return BadRequest("User not found");
+            var serviceResp = _service.GetById(id);            
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
 
-            return Ok(user);
+            return Ok(serviceResp.Data);
         }
 
         [HttpPost]
@@ -50,27 +55,29 @@ namespace DeviceManagementWeb.Controllers
 
             if (!PasswordIsValid(userInsertDto.Password))
                 return BadRequest("Password too short. Must contain at least 8 characters");
-            var userId = _service.Insert(userInsertDto);
 
-            if (userId == 0)
-                return BadRequest("An error has occured");
+            var serviceResp = _service.Insert(userInsertDto);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
 
-            return Ok(userId);
+            return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(UserInsertDto request)
         {
-            var user = _service.GetById(request.Id);
+            var user = _service.GetById(request.Id).Data;
             if (user == null)
-                return BadRequest("User not found");
+                return NotFound("User not found");
 
             if (!EmailIsValid(request.Email))
                 return BadRequest("Invalid email");
 
-            int affectedRows = _service.Update(request);
-            if(affectedRows == 0)
-                return BadRequest("An error has occured");
+            var serviceResp = _service.Update(request);
+            int affectedRows = serviceResp.Data;
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
 
             return Ok(affectedRows);
         }
@@ -81,13 +88,10 @@ namespace DeviceManagementWeb.Controllers
             if (id < 1)
                 return BadRequest("Invalid Id");
 
-            var user = _service.GetById(id);
-            if (user == null)
-                return BadRequest("User not found");
-
-            int affectedRows = _service.Delete(id);
-            if (affectedRows == 0)
-                return BadRequest("An error has occured");
+            var serviceResp = _service.Delete(id);
+            int affectedRows = serviceResp.Data;
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
 
             return Ok(affectedRows);
         }

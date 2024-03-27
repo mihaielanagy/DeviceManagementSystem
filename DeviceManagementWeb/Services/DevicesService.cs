@@ -19,7 +19,7 @@ namespace DeviceManagementWeb.Services
             _mapper = mapper;
         }
 
-        public List<DeviceDto> GetAll()
+        public ServiceResponse<List<DeviceDto>> GetAll()
         {
             var devices = _deviceRepository.GetAll();
             var devicesDto = new List<DeviceDto>();
@@ -30,26 +30,23 @@ namespace DeviceManagementWeb.Services
                 devicesDto.Add(deviceDto);
             }
 
-            return devicesDto;
+            return new ServiceResponse<List<DeviceDto>>(devicesDto, true);
         }
 
-        public DeviceDto GetById(int id)
+        public ServiceResponse<DeviceDto> GetById(int id)
         {
             var device = _deviceRepository.GetById(id);
             if (device == null)
-                return null;
+                return new ServiceResponse<DeviceDto>(null, false,"Device not found");
 
             DeviceDto deviceDto = _mapper.Map<DeviceDto>(device);
-
-            return deviceDto;
+            return new ServiceResponse<DeviceDto>(deviceDto, true);
         }
 
-        public int Insert(DeviceInsertDto request)
+        public ServiceResponse<int> Insert(DeviceInsertDto request)
         {
             if (request == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Device cannot be null");
 
             var device = new Device
             {
@@ -62,18 +59,17 @@ namespace DeviceManagementWeb.Services
             };
 
             _deviceRepository.Insert(device);
-
-            return device.Id;
+            return new ServiceResponse<int>(device.Id, true);
         }
 
-        public int Update(DeviceInsertDto request)
+        public ServiceResponse<int> Update(DeviceInsertDto request)
         {
-            if (request == null || request.Id < 1)
-                return 0;
+            if (request == null)
+                return new ServiceResponse<int>(0, false, "Device cannot be null");
 
             var device = _deviceRepository.GetById(request.Id);
             if (device == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Device not found");
 
             device.Name = request.Name;
             device.IdManufacturer = request.IdManufacturer;
@@ -84,29 +80,28 @@ namespace DeviceManagementWeb.Services
             device.IdCurrentUser = request.IdUser;
 
             int affectedRows = _deviceRepository.Update(device);
-
-            return affectedRows;
+            return new ServiceResponse<int>(affectedRows, true);
         }
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id < 1)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var device = _deviceRepository.GetById(id);
             if (device == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Device not found");
 
             int affectedRows = _deviceRepository.Delete(id);
-            return affectedRows;
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int UpdateDeviceUser(int deviceId, int? userId)
+        public ServiceResponse<int> UpdateDeviceUser(int deviceId, int? userId)
         {
             var device = _deviceRepository.GetById(deviceId);
             device.IdCurrentUser = userId;
             int affectedRows = _deviceRepository.Update(device);
 
-            return affectedRows;
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
         //private DeviceDto MapDevice(Device device)

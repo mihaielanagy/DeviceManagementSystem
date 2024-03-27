@@ -17,7 +17,7 @@ namespace DeviceManagementWeb.Services
             _mapper = mapper;
         }
 
-        public List<OsVersionDto> GetAll()
+        public ServiceResponse<List<OsVersionDto>> GetAll()
         {
             var osvList = new List<OsVersionDto>();
             var dbList = _repository.GetAll();
@@ -27,31 +27,26 @@ namespace DeviceManagementWeb.Services
                 osvList.Add(_mapper.Map<OsVersionDto>(osv));
             }
 
-
-            return osvList;
+            return new ServiceResponse<List<OsVersionDto>>(osvList, true);
         }
 
-        public OsVersionDto GetById(int id)
+        public ServiceResponse<OsVersionDto> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<OsVersionDto>(null, false, "Invalid id");
 
             var operatingSystemVersion = _repository.GetById(id);
-
-            return _mapper.Map<OsVersionDto>(operatingSystemVersion);
+            var item = _mapper.Map<OsVersionDto>(operatingSystemVersion);
+            return new ServiceResponse<OsVersionDto>(item, true);
         }
 
-        public int Insert(OsVersionDto request)
+        public  ServiceResponse<int> Insert(OsVersionDto request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Name cannot be null");
 
             if (request.OS == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "OS Version not found");
 
             var osv = new OperatingSystemVersion
             {
@@ -60,41 +55,36 @@ namespace DeviceManagementWeb.Services
             };
 
             _repository.Insert(osv);
-
-            return osv.Id;
+            return new ServiceResponse<int>(osv.Id, true);            
         }
 
-        public int Update(OsVersionDto request)
+        public ServiceResponse<int> Update(OsVersionDto request)
         {
             if (request == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Name cannot be null");
 
             if (request.Id <= 0)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var osv = _repository.GetById(request.Id);
             osv.Name = request.Name;
             osv.IdOs = request.OS.Id;
 
-            return _repository.Update(osv);
+            var affectedRows = _repository.Update(osv);
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id < 1)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var osv = _repository.GetById(id);
             if (osv == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "OS Version not found");
 
-            return _repository.Delete(id);
+            var affectedRows = _repository.Delete(id);
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
         //private OsVersionDto MapOSVersion(OperatingSystemVersion request)

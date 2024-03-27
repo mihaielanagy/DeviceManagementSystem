@@ -17,7 +17,12 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<Ramamount>> GetAll()
         {
-            return Ok(_ramAmountsService.GetAll());
+            var serviceResp = _ramAmountsService.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -26,72 +31,57 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var ramAmount = _ramAmountsService.GetById(id);
+            var serviceResp = _ramAmountsService.GetById(id);
 
-            if (ramAmount == null)
-                return BadRequest("RAM Amount not found");
-
-            return Ok(ramAmount);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(Ramamount request)
         {
             if (request.Amount <= 0)
-            {
                 return BadRequest("RAM Amount cannot be less than or equal to 0.");
-            }
 
-            var id = _ramAmountsService.Insert(request);
+            var serviceResp = _ramAmountsService.Insert(request);
 
-            if (id == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(Ramamount request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("Id is invalid.");
-            }
 
             if (request.Amount <= 0)
-            {
                 return BadRequest("RAM Amount cannot be less than or equal to 0.");
-            }
 
-            int rowsAffected = _ramAmountsService.Update(request);
+            var serviceResp = _ramAmountsService.Update(request);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("RAM Amount not found.");
-            }
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int rowsAffected = _ramAmountsService.Delete(id);
+            var serviceResp = _ramAmountsService.Delete(id);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("RAM Amount not found.");
-            };
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
-
     }
 }

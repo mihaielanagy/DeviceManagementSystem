@@ -18,7 +18,12 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<DeviceType>> GetAll()
         {
-            return Ok(_deviceTypesService.GetAll());
+            var serviceResp = _deviceTypesService.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -27,72 +32,58 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var deviceType = _deviceTypesService.GetById(id);
+            var serviceResp = _deviceTypesService.GetById(id);
 
-            if (deviceType == null)
-                return BadRequest("Device type not found");
-
-            return Ok(deviceType);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(DeviceType request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Manufacturer name cannot be empty");
-            }
 
-            var id = _deviceTypesService.Insert(request);
+            var serviceResp = _deviceTypesService.Insert(request);
 
-            if (id == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(DeviceType request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("Id is invalid.");
-            }
+
 
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Name cannot be empty.");
-            }
 
-            int rowsAffected = _deviceTypesService.Update(request);
+            var serviceResp = _deviceTypesService.Update(request);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Device Type not found.");
-            }
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int rowsAffected = _deviceTypesService.Delete(id);
+            var serviceResp = _deviceTypesService.Delete(id);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Device Type not found.");
-            };
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
-
     }
 }

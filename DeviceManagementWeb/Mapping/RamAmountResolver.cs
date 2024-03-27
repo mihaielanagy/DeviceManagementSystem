@@ -15,7 +15,7 @@ namespace DeviceManagementWeb.Mapping
 
         public Ramamount Resolve(Device source, DeviceDto destination, Ramamount destMember, ResolutionContext context)
         {
-            return _service.GetById(source.IdRamamount);
+            return _service.GetById(source.IdRamamount).Data;
         }
     }
 }

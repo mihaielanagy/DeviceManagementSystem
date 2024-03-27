@@ -15,7 +15,7 @@ namespace DeviceManagementWeb.Mapping
 
         public DeviceType Resolve(Device source, DeviceDto destination, DeviceType destMember, ResolutionContext context)
         {
-            return _service.GetById(source.IdDeviceType);
+            return _service.GetById(source.IdDeviceType).Data;
         }
     }
 }

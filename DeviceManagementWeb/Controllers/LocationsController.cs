@@ -20,9 +20,12 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<LocationDto>> GetAll()
         {
-            var locations = _service.GetAll();
+            var serviceResp = _service.GetAll();
 
-            return Ok(locations);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -31,81 +34,64 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var location = _service.GetById(id);
+            var serviceResp = _service.GetById(id);
 
-            if (location == null)
-                return BadRequest("Location not found");
-
-            return Ok(location);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(LocationDto request)
         {
             if (string.IsNullOrEmpty(request.Address))
-            {
                 return BadRequest("Address cannot be empty");
-            }
+
 
             if (request.City == null)
-            {
                 return BadRequest("City cannot be null.");
-            }
 
-            var locId = _service.Insert(request);
-            if (locId == 0)
-            {
-                return BadRequest("An error has occured");
-            }
+            var serviceResp = _service.Insert(request);
 
-            return Ok(locId);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(LocationDto request)
         {
             if (request.Id < 1)
-            {
-                return BadRequest("Location id is invalid.");
-            }
-
+                            return BadRequest("Location id is invalid.");
+            
             if (string.IsNullOrEmpty(request.Address))
-            {
-                return BadRequest("Address cannot be empty.");
-            }
-
+                            return BadRequest("Address cannot be empty.");
+           
             if (request.City == null)
-            {
-                return BadRequest("City cannot be null.");
-            }
+                            return BadRequest("City cannot be null.");
+           
+            var serviceResp = _service.Update(request);
 
-            int affectedRows = _service.Update(request);
-
-            if (affectedRows == 0)
-            {
-                return NotFound("Location not found.");
-            }
-
-            return Ok(affectedRows);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
-                return BadRequest("Id is invalid");
-            }
+                            return BadRequest("Id is invalid");
+           
+            var serviceResp = _service.Delete(id);
 
-            int affectedRows = _service.Delete(id);
-
-
-            if (affectedRows == 0)
-            {
-                return NotFound("Location not found.");
-            };
-
-            return Ok(affectedRows);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
     }
 }

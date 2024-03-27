@@ -18,7 +18,12 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<OperatingSystem>> GetAll()
         {
-            return Ok(_service.GetAll());
+            var serviceResp = _service.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -27,70 +32,56 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var operatingSystem = _service.GetById(id);
+            var serviceResp = _service.GetById(id);
 
-            if (operatingSystem == null)
-                return BadRequest("Operating system not found");
-
-            return Ok(operatingSystem);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(OperatingSystem request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("OS name cannot be empty");
-            }
 
-            var id = _service.Insert(request);
-            if (id == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(id);
+            var serviceResp = _service.Insert(request);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(OperatingSystem request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("Id is invalid.");
-            }
 
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Name cannot be empty.");
-            }
 
-            int rowsAffected = _service.Update(request);
+            var serviceResp = _service.Update(request);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Operating System not found.");
-            }
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int rowsAffected = _service.Delete(id);
+            var serviceResp = _service.Delete(id);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Operating System not found.");
-            };
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
     }
 }

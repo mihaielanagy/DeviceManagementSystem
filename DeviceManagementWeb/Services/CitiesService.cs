@@ -17,7 +17,7 @@ namespace DeviceManagementWeb.Services
             _mapper = mapper;
         }
 
-        public List<CityDto> GetAll()
+        public ServiceResponse<List<CityDto>> GetAll()
         {
             var cities = _repository.GetAll();
             var citiesDto = new List<CityDto>();
@@ -26,36 +26,40 @@ namespace DeviceManagementWeb.Services
                 CityDto cityDto = _mapper.Map<CityDto>(city);
                 citiesDto.Add(cityDto);
             }
-            return citiesDto;
+
+            return new ServiceResponse<List<CityDto>>(citiesDto, true); ;
         }
 
-        public CityDto GetById(int id)
+        public ServiceResponse<CityDto> GetById(int id)
         {
+
             if (id <= 0)
-                return null;
+            {
+                return new ServiceResponse<CityDto>(null, false, "Invalid Id. Id cannot be a number smaller than 0");
+            }
 
             var city = _repository.GetById(id);
-
             CityDto cityDto = _mapper.Map<CityDto>(city);
-
-            return cityDto;
+            
+            return new ServiceResponse<CityDto>(cityDto, true);
         }
 
-        public int Insert(CityDto request)
+        public ServiceResponse<int> Insert(CityDto request)
         {
+
             if (string.IsNullOrEmpty(request.Name))
             {
-                return 0;
+                return new ServiceResponse<int>(0, false, "The name cannot be empty");
             }
 
             if (request.Country.Id < 1)
             {
-                return 0;
+                return new ServiceResponse<int>(0, false, "Invalid Id");
             }
 
             if (request.Country == null)
             {
-                return 0;
+                return new ServiceResponse<int>(0, false, "Country cannot be null");
             }
 
             var city = new City
@@ -65,44 +69,49 @@ namespace DeviceManagementWeb.Services
             };
 
             _repository.Insert(city);
-            return city.Id;
+
+            return new ServiceResponse<int>(city.Id, true);
         }
 
 
-        public int Update(CityDto request)
+        public ServiceResponse<int> Update(CityDto request)
         {
+
             if (request == null)
             {
-                throw new ObjectNotFoundException("City cannot be null");
+                return new ServiceResponse<int>(0, false, "City cannot be null");
             }
 
             if (request.Id <= 0)
             {
-                throw new ArgumentException("Id is invalid");
+                return new ServiceResponse<int>(0, false, "Invalid id");
             }
 
             var city = _repository.GetById(request.Id);
             if (city == null)
-                throw new ObjectNotFoundException("City not found in the database");
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             city.Name = request.Name;
             city.IdCountry = request.Country.Id;
 
-            return _repository.Update(city);
+            return new ServiceResponse<int>(_repository.Update(city), true);
+
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id < 1)
             {
-                throw new ArgumentException("City id is invalid", nameof(id));
+                return new ServiceResponse<int>(0, false, "City id is invalid");
             }
 
             var city = _repository.GetById(id);
             if (city == null)
-                throw new ObjectNotFoundException("City id not found in the database.");
+                return new ServiceResponse<int>(0, false, "City id not found in the database.");
 
-            return _repository.Delete(city.Id);
+            var deletedRows = _repository.Delete(city.Id);
+
+            return new ServiceResponse<int>(deletedRows, false, "City id is invalid");
         }
 
         //public CityDto MapCity(City city)

@@ -15,7 +15,7 @@ namespace DeviceManagementWeb.Mapping
         public Role Resolve(User source, UserDto destination, Role destMember, ResolutionContext context)
         {
             // Fetch the Role from the database using _roleService.GetById
-            return _roleService.GetById(source.IdRole);
+            return _roleService.GetById(source.IdRole).Data;
         }
     }
 }

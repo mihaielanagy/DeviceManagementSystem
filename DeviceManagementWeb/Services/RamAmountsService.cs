@@ -10,63 +10,61 @@ namespace DeviceManagementWeb.Services
         {
             _repository = repository;
         }
-        public List<Ramamount> GetAll()
+        public ServiceResponse<List<Ramamount>> GetAll()
         {
-            return _repository.GetAll();
+            var list = _repository.GetAll();
+            return new ServiceResponse<List<Ramamount>>(list, true);
         }
 
-        public Ramamount GetById(int id)
+        public ServiceResponse<Ramamount> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<Ramamount>(null, false, "Id not found");
 
-            return _repository.GetById(id);
+            var item = _repository.GetById(id);
+            return new ServiceResponse<Ramamount>(item, true);
         }
 
-        public int Insert(Ramamount request)
+        public ServiceResponse<int> Insert(Ramamount request)
         {
             if (request.Amount <= 0)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Amount cannot be less than 0");
 
             //var existing = _context.Ramamounts.FirstOrDefault(x => x.Amount == request.Amount);
             //if (existing != null)
             //    return 0;
 
             _repository.Insert(request);
-
-            return request.Id;
+            return new ServiceResponse<int>(request.Id, true);
         }
 
-        public int Update(Ramamount request)
+        public ServiceResponse<int> Update(Ramamount request)
         {
-            if (request == null || request.Id <= 0 || request.Amount <=0)
-            {
-                return 0;
-            }
+            if (request == null || request.Amount <= 0)
+                return new ServiceResponse<int>(0, false, "Amount cannot be null or less than 0");
+
+            if (request.Id <= 0)
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var dbItem = _repository.GetById(request.Id);
             if (dbItem == null)
-                return 0;
+               return new ServiceResponse<int>(0, false, "Id not found");
 
-            return _repository.Update(dbItem);
+            var affectedRows = _repository.Update(dbItem);
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id <= 0)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var amount = _repository.GetById(id);
             if (amount == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Id not found");
 
-            return _repository.Delete(id);
+            var affectedRows = _repository.Delete(id);
+            return new ServiceResponse<int>(affectedRows, true);
         }
     }
 }

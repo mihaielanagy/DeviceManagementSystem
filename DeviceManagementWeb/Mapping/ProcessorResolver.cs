@@ -15,7 +15,7 @@ namespace DeviceManagementWeb.Mapping
 
         public Processor Resolve(Device source, DeviceDto destination, Processor destMember, ResolutionContext context)
         {
-            return _service.GetById(source.IdProcessor);
+            return _service.GetById(source.IdProcessor).Data;
         }
     }
 }

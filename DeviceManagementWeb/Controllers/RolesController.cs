@@ -20,63 +20,57 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<Role>> GetAll()
         {
-            return Ok(_rolesService.GetAll());
+            var serviceResp = _rolesService.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
         public ActionResult<Role> GetById(int id)
         {
-                _loggingService.LogInformation("User logged successfuly.");
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var role = _rolesService.GetById(id);
+            var serviceResp = _rolesService.GetById(id);
 
-            if (role == null)
-                return BadRequest("Role not found");
-
-            return Ok(role);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(Role request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Role name cannot be empty");
-            }
 
-            var id = _rolesService.Insert(request);
+            var serviceResp = _rolesService.Insert(request);
 
-            if (id == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(Role request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("Id is invalid.");
-            }
 
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Role name cannot be empty.");
-            }
 
-            int rowsAffected = _rolesService.Update(request);
+            var serviceResp = _rolesService.Update(request);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Role not found.");
-            }
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
@@ -87,15 +81,12 @@ namespace DeviceManagementWeb.Controllers
                 return BadRequest("Id is invalid");
             }
 
-            int rowsAffected = _rolesService.Delete(id);
+            var serviceResp = _rolesService.Delete(id);
 
-            if (rowsAffected == 0)
-            {
-                return NotFound("Role not found.");
-            };
-
-            return Ok(rowsAffected);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
-
     }
 }

@@ -17,7 +17,7 @@ namespace DeviceManagementWeb.Mapping
 
         public CityDto Resolve(Location source, LocationDto destination, CityDto destMember, ResolutionContext context)
         {
-            var city =  _cityService.GetById(source.IdCity);
+            var city =  _cityService.GetById(source.IdCity).Data;
 
             return _mapper.Map<CityDto>(city);
         }

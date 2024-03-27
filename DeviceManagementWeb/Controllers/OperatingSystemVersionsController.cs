@@ -19,7 +19,12 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<OperatingSystemVersion>> GetAll()
         {
-            return Ok(_service.GetAll());
+            var serviceResp = _service.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -28,74 +33,57 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var operatingSystemVersion = _service.GetById(id);
+            var serviceResp = _service.GetById(id);
 
-            if (operatingSystemVersion == null)
-                return BadRequest("OS Version not found");
-
-            return Ok(operatingSystemVersion);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(OsVersionDto request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("OS Version name cannot be empty");
-            }
 
-            var id = _service.Insert(request);
-            if (id == 0)
-            {
-                return BadRequest("An error has occured");
-            }
-
-            return Ok(id);
+            var serviceResp = _service.Insert(request);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         public ActionResult<int> Update(OsVersionDto request)
         {
             if (request.Id < 1)
-            {
                 return BadRequest("Id is invalid.");
-            }
 
             if (string.IsNullOrEmpty(request.Name))
-            {
                 return BadRequest("Name cannot be empty.");
-            }
 
             if(request.OS == null)
-            {
                 return BadRequest("OS Version cannot be null.");
-            }
 
-            int rowsAffected = _service.Update(request);
-            if (rowsAffected == 0)
-            {
-                return NotFound("OS Version not found.");
-            }
-
-            return Ok(rowsAffected);
+            var serviceResp = _service.Update(request);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int rowsAffected = _service.Delete(id);
-
-            if (rowsAffected == 0)
-            {
-                return NotFound("OS Version not found.");
-            };
-
-            return Ok(rowsAffected);
+            var serviceResp = _service.Delete(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
     }
 }

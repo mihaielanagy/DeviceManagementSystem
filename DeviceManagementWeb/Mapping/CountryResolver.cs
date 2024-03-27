@@ -15,7 +15,7 @@ namespace DeviceManagementWeb.Mapping
 
         public Country Resolve(City source, CityDto destination, Country destMember, ResolutionContext context)
         {
-            return _countryService.GetById(source.IdCountry);
+            return _countryService.GetById(source.IdCountry).Data;
         }
     }
 }

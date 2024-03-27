@@ -14,74 +14,78 @@ namespace DeviceManagementWeb.Services
             _repository = repository;
         }
 
-        public List<Country> GetAll()
+        public ServiceResponse<List<Country>> GetAll()
         {
-            return _repository.GetAll();
+            var countries = _repository.GetAll();
+
+            return new ServiceResponse<List<Country>>(countries, true);
         }
 
-        public Country GetById(int id)
+        public ServiceResponse<Country> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<Country>(null, false, "Invalid Id");
 
-            return _repository.GetById(id);
+            var country = _repository.GetById(id);
+            return new ServiceResponse<Country>(country, true);
         }
 
-        public int Insert(Country country)
+        public ServiceResponse<int> Insert(Country country)
         {
             if (string.IsNullOrEmpty(country.Name))
             {
-                throw new ArgumentException("Country name cannot be empty");
+                return new ServiceResponse<int>(0, false, "Country name cannot be empty");
             }
 
             _repository.Insert(country);
 
-            return country.Id;
+            return new ServiceResponse<int>(country.Id, true);
         }
 
 
-        public int Update(Country country)
+        public ServiceResponse<int> Update(Country country)
         {
             if (string.IsNullOrEmpty(country.Name))
             {
-                throw new ArgumentException("Country name cannot be null", nameof(country.Name));
+                return new ServiceResponse<int>(0, false, "Country name cannot be empty");
             }
 
             if (country.Id < 1)
             {
-                throw new ArgumentException("Country id is invalid", nameof(country.Id));
+                return new ServiceResponse<int>(0, false, "Invalid Country Id");
             }
 
             if (country == null)
             {
-                throw new ArgumentException("Country cannot be null");
+                return new ServiceResponse<int>(0, false, "Country cannot be null");
             }
 
             var dbCountry = _repository.GetById(country.Id);
-            if(dbCountry == null)
+            if (dbCountry == null)
             {
-                throw new ObjectNotFoundException("Country not found in the database.");
+                return new ServiceResponse<int>(0, false, "Country not found in the database");
             }
 
             dbCountry.Name = country.Name;
-                        
-            return _repository.Update(dbCountry);
+            var affectedRows = _repository.Update(dbCountry);
+
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id < 1)
             {
-                throw new ArgumentException("Country id is invalid", nameof(id));
+                return new ServiceResponse<int>(0, false, "Invalid Country Id");
             }
 
             var country = _repository.GetById(id);
             if (country == null)
-                throw new ObjectNotFoundException("Country id not found in the database.");
+                return new ServiceResponse<int>(0, false, "Country not found in the database");
 
-            
-            return _repository.Delete(country.Id);
+            var affectedRows = _repository.Delete(country.Id);
+
+            return new ServiceResponse<int>(affectedRows, true);
         }
-
     }
 }

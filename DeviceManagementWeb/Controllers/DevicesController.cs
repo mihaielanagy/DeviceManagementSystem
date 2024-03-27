@@ -26,7 +26,12 @@ namespace DeviceManagementWeb.Controllers
         [Authorize]
         public ActionResult<List<DeviceDto>> GetAll()
         {
-            return Ok(_devicesService.GetAll());
+            var serviceResp = _devicesService.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -35,11 +40,12 @@ namespace DeviceManagementWeb.Controllers
         {
             if (id <= 0)
                 return BadRequest("Id is invalid.");
-            var device = _devicesService.GetById(id);
-            if(device == null)
-                return NotFound("Device not found");
 
-            return Ok(device);
+            var serviceResp = _devicesService.GetById(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
 
@@ -48,31 +54,32 @@ namespace DeviceManagementWeb.Controllers
         public ActionResult<int> Insert(DeviceInsertDto request)
         {
             if (request == null)
-            {
                 return BadRequest("Input data is invalid. Device cannot be null.");
-            }
 
-            int id = _devicesService.Insert(request);
-            if (id == 0)
-                return BadRequest("An error has occured.");
+            var serviceResp = _devicesService.Insert(request);
 
-            return Ok(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut]
         [Authorize]
         public ActionResult<int> Update(DeviceInsertDto request)
         {
-            if (request == null || request.Id < 1)
-            {
+            if (request.Id < 1)
                 return BadRequest("Id is invalid");
-            }
 
-            int affectedRows = _devicesService.Update(request);
-            if (affectedRows == 0)
-                return BadRequest("Device not found");
+            if (request == null)
+                return BadRequest("Device cannot be null");
 
-            return Ok(affectedRows);
+
+            var serviceResp = _devicesService.Update(request);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
@@ -80,15 +87,14 @@ namespace DeviceManagementWeb.Controllers
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            int affectedRows = _devicesService.Delete(id);
-            if (affectedRows == 0)
-                return BadRequest("Device not found");
 
-            return Ok(affectedRows);
+            var serviceResp = _devicesService.Delete(id);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpPut("assign/{id}")]
@@ -96,42 +102,33 @@ namespace DeviceManagementWeb.Controllers
         public ActionResult<int> AssignDeviceToCurrentUser(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Device id is invalid");
-            }
+
 
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
-            {
                 return BadRequest("User id not found");
-            }
+
 
             var userId = int.Parse(userIdClaim.Value);
 
             if (userId < 1)
-            {
                 return BadRequest("User id is invalid");
-            }
 
-            var device = _devicesService.GetById(id);
-            var user = _usersService.GetById(userId);
+            var deviceResp = _devicesService.GetById(id);
+            var userResp = _usersService.GetById(userId);
 
-            if (user == null)
-            {
+            if (userResp.Data == null)
                 return BadRequest("User not found");
-            }
 
-            if (device == null)
-            {
-                return BadRequest("Device not found");
-            }
+            if (deviceResp.Data == null)
+                return NotFound("Device not found");
 
-            int affectedRows = _devicesService.UpdateDeviceUser(device.Id, user.Id);
-            if (affectedRows == 0)
-                return BadRequest("The current user couldn't be assigned.");
-
-
-            return Ok(affectedRows);
+            var assignResp = _devicesService.UpdateDeviceUser(deviceResp.Data.Id, userResp.Data.Id);
+            if (assignResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {assignResp.ErrorMessage}");
+            else
+                return Ok(assignResp.Data);
         }
 
         [HttpPut("unassign/{id}")]
@@ -139,22 +136,18 @@ namespace DeviceManagementWeb.Controllers
         public ActionResult<int> UnassignDevice(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Device id is invalid");
-            }
 
-            var device = _devicesService.GetById(id);
+            var device = _devicesService.GetById(id).Data;
 
             if (device == null)
-            {
                 return BadRequest("Device not found");
-            }
 
-            int affectedRows = _devicesService.UpdateDeviceUser(device.Id, null);
-            if (affectedRows == 0)
-                return BadRequest("An error has occured.");
-
-            return Ok(affectedRows);
+            var serviceResp = _devicesService.UpdateDeviceUser(device.Id, null);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
     }
 }

@@ -9,25 +9,26 @@ namespace DeviceManagementWeb.Services
         {
             _repository = repository;
         }
-        public List<Processor> GetAll()
+        public ServiceResponse<List<Processor>> GetAll()
         {
-            return _repository.GetAll();
+            var list = _repository.GetAll();
+            return new ServiceResponse<List<Processor>>(list, true);
         }
 
-        public Processor GetById(int id)
+        public ServiceResponse<Processor> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<Processor>(null, false, "Invalid Id");
 
-            return _repository.GetById(id);
+            var processor = _repository.GetById(id);
+            return new ServiceResponse<Processor>(processor, true);
+
         }
 
-        public int Insert(Processor request)
+        public ServiceResponse<int> Insert(Processor request)
         {
             if (string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Processor name cannot be null.");
 
             //var existingProcessor = _context.Processors.FirstOrDefault(x => x.Name == request.Name);
             //if (existingProcessor != null)
@@ -35,39 +36,34 @@ namespace DeviceManagementWeb.Services
 
             _repository.Insert(request);
 
-            return request.Id;
+            return new ServiceResponse<int>(request.Id, true);
         }
 
-        public int Update(Processor request)
+        public ServiceResponse<int> Update(Processor request)
         {
-            if (request == null || request.Id <= 0 || string.IsNullOrEmpty(request.Name))
-            {
-                return 0;
-            }
+            if (request == null || string.IsNullOrEmpty(request.Name))
+                return new ServiceResponse<int>(0, false, "Processor name cannot be null.");
 
             var dbItem = _repository.GetById(request.Id);
             if (dbItem == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Id not found.");
+
 
             dbItem.Name = request.Name;
-
-            return _repository.Update(dbItem);
+            var affectedRows = _repository.Update(dbItem);
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id <= 0)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Invalid id.");
 
             var processor = _repository.GetById(id);
             if (processor == null)
-            {
-                return 0;
-            }
-
-            return _repository.Delete(id);
+                return new ServiceResponse<int>(0, false, "Id not found.");
+            var affectedRows = _repository.Delete(id);
+            return new ServiceResponse<int>(affectedRows, true);
         }
     }
 }

@@ -8,20 +8,15 @@ namespace DeviceManagementWeb.Services
     public class UsersService : IUsersService
     {
         private readonly IBaseRepository<User> _userRepository;
-        private readonly IDataService<LocationDto> _locationService;
-        private readonly IDataService<Role> _roleService;
         public readonly IMapper _mapper;
 
-        public UsersService(IBaseRepository<User> userRepository, IDataService<LocationDto> locationService,
-            IDataService<Role> roleService, IMapper mapper)
+        public UsersService(IBaseRepository<User> userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
-            _locationService = locationService;
-            _roleService = roleService;
             _mapper = mapper;
         }
 
-        public List<UserDto> GetAll()
+        public ServiceResponse<List<UserDto>> GetAll()
         {
             var users = _userRepository.GetAll();
             var usersDto = new List<UserDto>();
@@ -33,21 +28,20 @@ namespace DeviceManagementWeb.Services
                 usersDto.Add(userDto);
             }
 
-            return usersDto;
+            return new ServiceResponse<List<UserDto>>(usersDto, true);
         }
 
-        public UserDto GetById(int id)
+        public ServiceResponse<UserDto> GetById(int id)
         {
             if (id < 1)
-                return null;
+                return new ServiceResponse<UserDto>(null, false, "Invalid id");
 
             var user = _userRepository.GetById(id);
             if (user == null)
-                return null;
+                return new ServiceResponse<UserDto>(null, false, "User not found");
 
             var userDto = _mapper.Map<UserDto>(user);
-
-            return userDto;
+            return new ServiceResponse<UserDto>(userDto, true);
         }
 
         //public UserDto GetByEmail(string email)
@@ -61,10 +55,10 @@ namespace DeviceManagementWeb.Services
 
         //    return userDto;
         //}
-        public int Insert(UserInsertDto userInsertDto)
+        public ServiceResponse<int> Insert(UserInsertDto userInsertDto)
         {
             if (!EmailIsValid(userInsertDto.Email))
-                return 0;
+                return new ServiceResponse<int>(0, false, "Email is invalid");
 
             //var existingUser = _context.Users.FirstOrDefault(u => u.Email == userInsertDto.Email);
             // if (existingUser != null)
@@ -72,7 +66,7 @@ namespace DeviceManagementWeb.Services
 
 
             if (!PasswordIsValid(userInsertDto.Password))
-                return 0;
+                return new ServiceResponse<int>(0, false, "Password is invalid");
 
             User user = new User
             {
@@ -85,18 +79,17 @@ namespace DeviceManagementWeb.Services
             };
 
             _userRepository.Insert(user);
-
-            return user.Id;
+            return new ServiceResponse<int>(user.Id, true);
         }
 
-        public int Update(UserInsertDto request)
+        public ServiceResponse<int> Update(UserInsertDto request)
         {
             var user = _userRepository.GetById(request.Id);
             if (user == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "User not found");
 
             if (!EmailIsValid(user.Email))
-                return 0;
+                return new ServiceResponse<int>(0, false, "Email is invalid");
 
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
@@ -105,21 +98,20 @@ namespace DeviceManagementWeb.Services
             user.IdLocation = request.IdLocation;
 
             int affectedRows = _userRepository.Update(user);
-            return affectedRows;
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id < 1)
-                return 0;
+                return new ServiceResponse<int>(0, false, "Invalid id");
 
             var user = _userRepository.GetById(id);
             if (user == null)
-                return 0;
+                return new ServiceResponse<int>(0, false, "User not found");
 
             int affectedRows = _userRepository.Delete(id);
-
-            return affectedRows;
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
         private bool EmailIsValid(string email) => email.Contains("@") && email.Contains(".");

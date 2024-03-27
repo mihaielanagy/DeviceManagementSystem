@@ -18,7 +18,7 @@ namespace DeviceManagementWeb.Services
             _mapper = mapper;
         }
 
-        public List<LocationDto> GetAll()
+        public ServiceResponse<List<LocationDto>> GetAll()
         {
             var locations = _locationRepository.GetAll();
             var locationsDto = new List<LocationDto>();
@@ -28,33 +28,30 @@ namespace DeviceManagementWeb.Services
                 locationsDto.Add(_mapper.Map<LocationDto>(location));
             }
 
-            return locationsDto;
+            return new ServiceResponse<List<LocationDto>>(locationsDto, true);
         }
 
-        public LocationDto GetById(int id)
+        public ServiceResponse<LocationDto> GetById(int id)
         {
             if (id <= 0)
-                return null;
+                return new ServiceResponse<LocationDto>(null, false, "Invalid id");
 
             var location = _locationRepository.GetById(id);
-
             if (location == null)
-                return null;
+                return new ServiceResponse<LocationDto>(null, false, "Location not found");
 
-            return _mapper.Map<LocationDto>(location);
+            var dto = _mapper.Map<LocationDto>(location);
+            return new ServiceResponse<LocationDto>(dto, true);
+
         }
 
-        public int Insert(LocationDto request)
+        public ServiceResponse<int> Insert(LocationDto request)
         {
             if (string.IsNullOrEmpty(request.Address))
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "Address cannot be null");
 
             if (request.City == null)
-            {
-                return 0;
-            }
+                return new ServiceResponse<int>(0, false, "City cannot be null");
 
             var location = new Location
             {
@@ -64,43 +61,36 @@ namespace DeviceManagementWeb.Services
 
             _locationRepository.Insert(location);
 
-            return location.Id;
+            return new ServiceResponse<int>(location.Id, true);
         }
 
-        public int Update(LocationDto request)
+        public ServiceResponse<int> Update(LocationDto request)
         {
             if (request == null)
-            {
-                throw new ObjectNotFoundException("Location cannot be null");
-            }
+                return new ServiceResponse<int>(0, false, "Location cannot be null");
 
             if (request.Id <= 0)
-            {
-                throw new ArgumentException("Id is invalid");
-            }
+                return new ServiceResponse<int>(0, false, "Invalid Id");
 
             var location = _locationRepository.GetById(request.Id);
             location.Address = request.Address;
             location.IdCity = request.City.Id;
 
             int affectedRows = _locationRepository.Update(location);
-            return affectedRows;
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
-        public int Delete(int id)
+        public ServiceResponse<int> Delete(int id)
         {
             if (id < 1)
-            {
-                throw new ArgumentException("Location id is invalid", nameof(id));
-            }
+                return new ServiceResponse<int>(0, false, "Location id is invalid");
 
             var location = _locationRepository.GetById(id);
             if (location == null)
-                throw new ObjectNotFoundException("Location not found in the database.");
+                return new ServiceResponse<int>(0, false, "Location not found in the database");
 
             int affectedRows = _locationRepository.Delete(id);
-
-            return affectedRows;
+            return new ServiceResponse<int>(affectedRows, true);
         }
 
         //private LocationDto MapLocation(Location request)

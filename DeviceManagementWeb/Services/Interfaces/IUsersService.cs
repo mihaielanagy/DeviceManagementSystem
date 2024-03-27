@@ -4,11 +4,11 @@ namespace DeviceManagementWeb.Services.Interfaces
 {
     public interface IUsersService
     {
-        List<UserDto> GetAll();
-        UserDto GetById(int id);
+        ServiceResponse<List<UserDto>> GetAll();
+        ServiceResponse<UserDto> GetById(int id);
         // UserDto GetByEmail(string email);
-        int Insert(UserInsertDto userInsertDto);
-        int Update(UserInsertDto request);
-        int Delete(int id);
+        ServiceResponse<int> Insert(UserInsertDto userInsertDto);
+        ServiceResponse<int> Update(UserInsertDto request);
+        ServiceResponse<int> Delete(int id);
     }
 }

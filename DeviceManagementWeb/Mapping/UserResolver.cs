@@ -17,7 +17,7 @@ namespace DeviceManagementWeb.Mapping
 
         public UserDto Resolve(Device source, DeviceDto destination, UserDto destMember, ResolutionContext context)
         {
-            var user = _service.GetById(source.IdCurrentUser ?? 0);
+            var user = _service.GetById(source.IdCurrentUser ?? 0).Data;
             return _mapper.Map<UserDto>(user);
         }
     }

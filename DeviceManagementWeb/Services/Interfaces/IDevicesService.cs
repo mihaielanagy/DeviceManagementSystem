@@ -4,12 +4,12 @@ namespace DeviceManagementWeb.Services.Interfaces
 {
     public interface IDevicesService
     {
-        List<DeviceDto> GetAll();
-        DeviceDto GetById(int id);
-        int Insert(DeviceInsertDto request);
-        int Update(DeviceInsertDto request);
-        int Delete(int id);
-        int UpdateDeviceUser(int deviceId, int? userId);
+        ServiceResponse<List<DeviceDto>> GetAll();
+        ServiceResponse<DeviceDto> GetById(int id);
+        ServiceResponse<int> Insert(DeviceInsertDto request);
+        ServiceResponse<int> Update(DeviceInsertDto request);
+        ServiceResponse<int> Delete(int id);
+        ServiceResponse<int> UpdateDeviceUser(int deviceId, int? userId);
 
     }
 }

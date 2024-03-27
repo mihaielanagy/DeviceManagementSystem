@@ -20,7 +20,12 @@ namespace DeviceManagementWeb.Controllers
         [HttpGet]
         public ActionResult<List<Country>> GetAll()
         {
-            return Ok(_countriesService.GetAll());
+            var serviceResp = _countriesService.GetAll();
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+            else
+                return Ok(serviceResp.Data);
         }
 
         [HttpGet("{id}")]
@@ -29,81 +34,58 @@ namespace DeviceManagementWeb.Controllers
             if (id <= 0)
                 return BadRequest("Invalid Id");
 
-            var country = _countriesService.GetById(id);
+            var serviceResp = _countriesService.GetById(id);
 
-            if (country == null)
-                return BadRequest("Country not found");
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
 
-            return Ok(country);
+            return Ok(serviceResp.Data);
         }
 
         [HttpPost]
         public ActionResult<int> Insert(Country country)
         {
             if (string.IsNullOrEmpty(country.Name))
-            {
                 return BadRequest("Country name cannot be empty");
-            }
-                        
-            try
-            {
-                var countryId = _countriesService.Insert(country);
-                return Ok(countryId);
-            }
-            catch (Exception)
-            {
-                return BadRequest("Country could not be added.");
-            }                     
-            
+
+            var serviceResp = _countriesService.Insert(country);
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+
+            return Ok(serviceResp.Data);
+
         }
 
         [HttpPut]
         public ActionResult<int> Update(Country country)
         {
             if (string.IsNullOrEmpty(country.Name))
-            {
                 return BadRequest("Country name cannot be empty");
-            }
+
 
             if (country.Id < 1)
-            {
                 return BadRequest("Country id is invalid");
-            }
 
-            try
-            {
-                return Ok(_countriesService.Update(country));
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }            
+            var serviceResp = _countriesService.Update(country);
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+
+            return Ok(serviceResp.Data);
         }
 
         [HttpDelete("{id}")]
         public ActionResult<int> Delete(int id)
         {
             if (id < 1)
-            {
                 return BadRequest("Id is invalid");
-            }
 
-            try
-            {
-                return Ok(_countriesService.Delete(id));
-            }
-            catch (ObjectNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            } 
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            var serviceResp = _countriesService.Delete(id);
+
+            if (serviceResp.IsSuccess == false)
+                return BadRequest($"An error has occured: {serviceResp.ErrorMessage}");
+
+            return Ok(serviceResp.Data);
         }
     }
 }
