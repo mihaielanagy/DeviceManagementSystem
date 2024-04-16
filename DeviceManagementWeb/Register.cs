@@ -26,6 +26,8 @@ namespace DeviceManagementWeb
             serviceProvider.AddTransient<IDataService<Role>, RolesService>();
             serviceProvider.AddTransient<IDataService<OsVersionDto>, OSVersionsService>();
             serviceProvider.AddTransient<IDataService<LocationDto>, LocationsService>();
+
+            serviceProvider.AddTransient<ITokenService, TokenService>();
         }
 
         public static void RegisterRepositories(this IServiceCollection serviceProvider)

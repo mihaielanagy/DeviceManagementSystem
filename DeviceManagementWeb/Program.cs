@@ -11,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.RegisterServices();
 builder.Services.RegisterRepositories();
 
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@123"));
+builder.Services.AddSingleton(key);
 
 // Add services to the container.
 builder.Services.AddAuthentication(opt =>

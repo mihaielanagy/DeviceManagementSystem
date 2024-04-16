@@ -17,52 +17,59 @@ namespace DeviceManagementWeb.Controllers
     {
         private readonly DeviceManagementContext _context;
         private readonly ILoggingService _loggingService;
+        private readonly ITokenService _tokenService;
 
-        public AuthController(DeviceManagementContext context, ILoggingService loggingService)
+        public AuthController(DeviceManagementContext context, ILoggingService loggingService, ITokenService tokenService)
         {
             _context = context;
             _loggingService = loggingService;
+            _tokenService = tokenService;
         }
 
         [HttpPost, Route("login")]
         public IActionResult Login([FromBody] UserLoginDto user)
         {
+            
             if (user == null || string.IsNullOrEmpty(user.Email) ||
                 string.IsNullOrEmpty(user.Password))
-                return BadRequest("Invalid client request");
+                return Unauthorized("Invalid client request");
 
             var foundUser = _context.Users.FirstOrDefault(u => u.Email == user.Email);
             if (foundUser == null)
-                return BadRequest("User not found");
-            var passwordValid = foundUser.Password.Equals(user.Password);
+                return Unauthorized("User not found");
 
+            var passwordValid = foundUser.Password.Equals(user.Password);
             if (!passwordValid)
                 return Unauthorized("Invalid credentials");
             else
             {
-                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@123"));
-                var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                var token = _tokenService.GenerateToken(foundUser);
+                _loggingService.LogInformation("User logged successfully.");
+                return Ok(new { Token = token });
 
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Name, $"{foundUser.FirstName} {foundUser.LastName}"),
-                    new Claim(ClaimTypes.NameIdentifier, foundUser.Id.ToString())
-                };
+                //var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@123"));
+                //var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
-                var tokenOptions = new JwtSecurityToken(
-                    issuer: "https://localhost:7250",
-                    audience: "https://localhost:7250/",
-                    claims: claims,
-                    expires: DateTime.Now.AddMinutes(100),
-                    signingCredentials: signingCredentials
-                );
+                //var claims = new List<Claim>
+                //{
+                //    new Claim(ClaimTypes.Email, user.Email),
+                //    new Claim(ClaimTypes.Name, $"{foundUser.FirstName} {foundUser.LastName}"),
+                //    new Claim(ClaimTypes.NameIdentifier, foundUser.Id.ToString())
+                //};
 
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+                //var tokenOptions = new JwtSecurityToken(
+                //    issuer: "https://localhost:7250",
+                //    audience: "https://localhost:7250/",
+                //    claims: claims,
+                //    expires: DateTime.Now.AddMinutes(100),
+                //    signingCredentials: signingCredentials
+                //);
 
-                _loggingService.LogInformation("User logged successfuly.");
+                //var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
-                return Ok(new { Token = tokenString });
+                //_loggingService.LogInformation("User logged successfuly.");
+
+                //return Ok(new { Token = tokenString });
             }
         }
     }
