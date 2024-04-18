@@ -40,7 +40,7 @@ namespace DeviceManagementWeb.Services
 
             var city = _repository.GetById(id);
             CityDto cityDto = _mapper.Map<CityDto>(city);
-            
+
             return new ServiceResponse<CityDto>(cityDto, true);
         }
 

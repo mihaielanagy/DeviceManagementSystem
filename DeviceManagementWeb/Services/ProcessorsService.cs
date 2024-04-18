@@ -1,4 +1,5 @@
 ﻿using DeviceManagementDB.Repositories;
+using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services.Interfaces;
 namespace DeviceManagementWeb.Services
 {

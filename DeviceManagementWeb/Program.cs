@@ -1,11 +1,12 @@
 global using DeviceManagementDB.Models;
-using DeviceManagementWeb;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Reflection;
 using DeviceManagementWeb.Mapping;
+using DeviceManagementWeb.Extensions;
+using DeviceManagementWeb.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.RegisterServices();
@@ -41,7 +42,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "Device Management API", Version = "v1" });
 
-    // Add the following code for JWT Authorization
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
@@ -78,7 +78,6 @@ builder.Services.AddCors(options => options.AddPolicy(name: "DeviceOrigins",
         policy.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader();
     }));
 builder.Services.AddDbContext<DeviceManagementContext>();
-//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 var app = builder.Build();
@@ -90,6 +89,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JWTAuthDemo v1"));
 }
 
+var logger = app.Services.GetRequiredService<ILoggingService>();
+//app.ConfigureExceptionHandler(logger);
+app.ConfigureCustomExceptionMiddleware();
 
 app.UseCors("DeviceOrigins");
 

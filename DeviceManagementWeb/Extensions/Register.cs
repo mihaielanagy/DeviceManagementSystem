@@ -5,7 +5,7 @@ using DeviceManagementWeb.Services;
 using DeviceManagementWeb.Services.Interfaces;
 using OperatingSystem = DeviceManagementDB.Models.OperatingSystem;
 
-namespace DeviceManagementWeb
+namespace DeviceManagementWeb.Extensions
 {
     public static class Register
     {
