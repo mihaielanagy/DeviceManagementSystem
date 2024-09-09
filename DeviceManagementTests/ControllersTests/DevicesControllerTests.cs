@@ -55,10 +55,11 @@ namespace DeviceManagementTests.ControllersTests
             _roleRepository = new BaseRepository<Role>(_dbContext);
             _deviceRepository = new BaseRepository<Device>(_dbContext);
 
+            _mapper = new A
             _deviceTypeService = new DeviceTypesService(_deviceTypeRepository);
             _manufacturerService = new ManufacturersService(_manufacturerRepository);
             _osService = new OperatingSystemsService(_osRepository);
-            _osVersionService = new OSVersionsService(_osVersionRepository, _osService);
+            _osVersionService = new OSVersionsService(_osVersionRepository, _mapper);
             _processorService = new ProcessorsService(_processorRepository);
             _ramService = new RamAmountsService(_ramRepository);
             _countryService = new CountriesService(_countryRepository);

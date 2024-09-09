@@ -3,35 +3,31 @@ using DeviceManagementDB.Repositories;
 using DeviceManagementWeb.Controllers;
 using DeviceManagementWeb.DTOs;
 using DeviceManagementWeb.Services;
+using DeviceManagementWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 
 namespace DeviceManagementTests.ControllersTests
 {
     public class CitiesControllersTests
     {
-        private DeviceManagementContext _dbContext;
+        private readonly Mock<IDataService<CityDto>> _mockDataService;
+        private readonly CitiesController _controller;
 
-        private CitiesService _cityService;
-        private CountriesService _countryService;
-        private BaseRepository<City> _cityRepository;
-        private BaseRepository<Country> _countryRepository;
         public CitiesControllersTests()
         {
-            _dbContext = new DeviceManagementContext();
-            _cityRepository = new BaseRepository<City>(_dbContext);
-            _countryRepository = new BaseRepository<Country>(_dbContext);
-            _countryService = new CountriesService(_countryRepository);
-            _cityService = new CitiesService(_cityRepository, _countryService);
+            _mockDataService = new Mock<IDataService<CityDto>>();
+            _controller = new CitiesController(_mockDataService.Object);
+
         }
 
         [Fact]
         public void CitiesControllers_GetAll()
         {
             // Arange
-            var controller = new CitiesController(_cityService);
 
             // Act
-            var result = (OkObjectResult)controller.GetAll().Result;
+            var result = (OkObjectResult)_controller.GetAll().Result;
             var allCities = (List<CityDto>)result.Value;
 
             // Assert
@@ -43,10 +39,10 @@ namespace DeviceManagementTests.ControllersTests
         public void CitiesControllers_GetById()
         {
             // Arange
-            var controller = new CitiesController(_cityService);
+           
 
             // Act
-            var result = (OkObjectResult)controller.GetById(1).Result;
+            var result = (OkObjectResult)_controller.GetById(1).Result;
             var city = (CityDto)result.Value;
 
             // Assert

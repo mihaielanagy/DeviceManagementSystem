@@ -87,14 +87,28 @@ export class DevicesListComponent implements OnInit, OnDestroy{
       
 
         console.log("in init");
-        console.log(this.userId);
-        this.subGet =  this.deviceService
-        .getDevices()
-        .subscribe((result: Device[]) => 
-            {this.devices = result;
-            this.filteredDevices = result
-            console.log(result)
-        });   
+        // console.log(this.userId);
+        // this.subGet =  this.deviceService
+        // .getDevices()
+        // .subscribe((result: Device[]) => 
+        //     {this.devices = result;
+        //     this.filteredDevices = result
+        //     console.log(result)
+        // });   
+
+        this.subGet = this.deviceService.getDevices().subscribe({
+            next: (result: Device[]) => {
+              this.devices = result;
+              this.filteredDevices = result;
+              console.log(result);
+            },
+            error: (err) => {
+              if (err.status === 401) {
+                this.router.navigateByUrl('/main-url');
+              }
+              console.error('An error occurred:', err);
+            }
+          });
          
     }
 

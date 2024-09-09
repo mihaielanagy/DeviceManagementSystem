@@ -16,9 +16,20 @@ export class DeviceDetailsComponent implements OnInit{
   getDevice(id: number): void{
     this.deviceService
     .getDeviceById(id)
-    .subscribe((result: Device) => {
-        this.device = result;        
-    })
+    .subscribe(
+      (result: Device) => {
+        this.device = result;
+      },
+      (error) => {
+        if (error.status === 401) {
+          // Redirect to the main URL if unauthorized
+          this.router.navigate(['/']);
+        } else {
+          // Optionally handle other errors
+          console.error('An error occurred:', error);
+        }
+      }
+    );
 }  
 
   ngOnInit(): void {
